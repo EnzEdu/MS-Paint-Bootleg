@@ -47,10 +47,12 @@ using namespace std;
 // Enumeracao com os tipos de formas geometricas
 enum estados_mouse
 {
-    CLICK = 0,
+    MOU = 0,
     LIN,    // Linha
-    TRI,        // Triangulo
+//    BAL,
+//    TRI,        // Triangulo
     RET,        // Retangulo
+    TRI,
     POL,        // Poligono
     CIR         // Circulo
 };
@@ -65,8 +67,7 @@ int m_x, m_y;
 int mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2;
 
 // Indica o tipo de forma geometrica ativa para desenhar
-//int modo = LIN;
-int modo = CLICK;
+int modo = MOU;
 
 // Largura e altura da janela
 int width = 512, height = 512;
@@ -137,7 +138,7 @@ void drawFormas();
 void retaBresenham(double x1, double y1, double x2, double y2);
 
 void verificaCliqueBotao(int mouseX, int mouseY);
-void trataCliqueBotao(int botao, int height);
+//void trataCliqueBotao(int botao, int height);
 
 
 
@@ -152,6 +153,7 @@ int main(int argc, char** argv){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);    // Selecao do modo do Display e do sistema de Cor utilizado
     //glutInitWindowSize(768, 512);                   // Tamanho da janela do OpenGL
     glutInitWindowSize(width, height);              // Tamanho da janela do OpenGL
+//    glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));              // Tamanho da janela do OpenGL
     glutInitWindowPosition(100, 100);               // Posicao inicial da janela do OpenGL
     glutCreateWindow("Computacao Grafica: Paint");  // Da nome para uma janela OpenGL
 
@@ -187,21 +189,30 @@ void init(void){
 
 
 /*
+ * Controla o menu pop-up
+ */
+void menu_popup(int value){
+    if (value == 0) exit(EXIT_SUCCESS);
+    modo = value;
+}
+
+
+/*
+ * Controle da posicao do cursor do mouse
+ */
+void mousePassiveMotion(int x, int y){
+    m_x = x; m_y = height - y - 1;
+    glutPostRedisplay();
+}
+
+
+/*
  * Controle das teclas comuns do teclado
  */
 void keyboard(unsigned char key, int x, int y){
     switch (key) {
         case ESC: exit(EXIT_SUCCESS); break;
     }
-}
-
-
-/*
- * Controla o menu pop-up
- */
-void menu_popup(int value){
-    if (value == 0) exit(EXIT_SUCCESS);
-    modo = value;
 }
 
 
@@ -215,7 +226,7 @@ void mouse(int button, int state, int x, int y){
 
             switch(modo){
 
-                case CLICK:
+                case MOU:
 
                     // Clique
                     if (state == GLUT_UP)
@@ -237,10 +248,7 @@ void mouse(int button, int state, int x, int y){
 
 
                 case LIN:
-
-//                    if (state == GLUT_DOWN) {
                     if (state == GLUT_UP) {
-
                         if (click1 == true)
                         {
                             mouseClick_x2 = x;
@@ -266,7 +274,58 @@ void mouse(int button, int state, int x, int y){
                             mouseClick_x1 = x;
                             mouseClick_y1 = height - y - 1;
                             
-                            // Se o clique nao foi na area de opcoes
+                            // Verifica se o clique nao foi na area de opcoes
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = true;
+                                retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                            }
+                            else
+                            {
+                                // Verifica se clicou em algum botao
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                                glutPostRedisplay();
+                            }
+
+                            printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
+                        }
+                    }
+                break;
+
+
+                case RET:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = false;
+                                
+                                pushForma(modo);
+                                pushVertice(mouseClick_x1, mouseClick_y2);
+                                pushVertice(mouseClick_x2, mouseClick_y2);
+                                pushVertice(mouseClick_x2, mouseClick_y1);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+
+                                glutPostRedisplay();   
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
+                                glutPostRedisplay();
+                            }
+
+                            printf("Clique 2(%d, %d)\n",mouseClick_x2,mouseClick_y2);
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
@@ -281,7 +340,13 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
                     }
+                break;
 
+                case TRI:
+                    if (state == GLUT_UP)
+                    {
+                        //
+                    }
                 break;
 
             }
@@ -301,15 +366,6 @@ void mouse(int button, int state, int x, int y){
 //        break;
             
     }
-}
-
-
-/*
- * Controle da posicao do cursor do mouse
- */
-void mousePassiveMotion(int x, int y){
-    m_x = x; m_y = height - y - 1;
-    glutPostRedisplay();
 }
 
 
@@ -348,7 +404,7 @@ void display(void)
 
 
     // Carrega o layout do app
-    desenhaExtras(wi, he);
+    desenhaGUI(wi, he, modo);
 
 
 
@@ -362,7 +418,10 @@ void display(void)
 
     drawFormas(); // Desenha as formas geometricas da lista
 
-    trataCliqueBotao(modo, he);
+
+    // Atualiza a borda dos botoes
+    // de acordo com o modo selecionado
+    //trataCliqueBotao(modo, he);
 
 
 
@@ -394,17 +453,39 @@ void drawFormas(){
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
         switch (f->tipo) {
             case LIN:
-                int i = 0, x[2], y[2];
-                //Percorre a lista de vertices da forma linha para desenhar
-                for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                    x[i] = v->x;
-                    y[i] = v->y;
+                {
+                    int i = 0, x[2], y[2];
+                    //Percorre a lista de vertices da forma linha para desenhar
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+                    //Desenha o segmento de reta apos dois cliques
+                    retaBresenham(x[0], y[0], x[1], y[1]);
                 }
-                //Desenha o segmento de reta apos dois cliques
-                retaBresenham(x[0], y[0], x[1], y[1]);
             break;
-//            case RET:
-//            break;
+
+            case RET:
+                {
+                    // Listas com os x e y de cada vertice da forma
+                    int i = 0, x[4], y[4];
+
+                    // Itera sob cada forma da lista
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Desenha os quatro lados
+                    retaBresenham(x[0], y[0], x[1], y[1]);
+                    retaBresenham(x[1], y[1], x[2], y[2]);
+                    retaBresenham(x[2], y[2], x[3], y[3]);
+                    retaBresenham(x[3], y[3], x[0], y[0]);
+                }
+            break;
+
+            default:
+            break;
         }
     }
 }
@@ -590,45 +671,34 @@ void verificaCliqueBotao(int mouseX, int mouseY)
     if (mouseClick_y1 >= height-45 && mouseClick_y1 <= height-25)
     {
 
-        // Clicou no primeiro botao vago
+        // Botao MOU
         if (mouseClick_x1 > 50 && mouseClick_x1 < 70)
         {
             printf("CLIQUE!!!!!\n");
-            modo = CLICK;
+            modo = MOU;
         }
 
-        // Botao LINHA
+        // Botao LIN
         else if (mouseClick_x1 > 70 && mouseClick_x1 < 90)
         {
             printf("LINHA!!!!!\n");
             modo = LIN;
         }
 
+        // Botao RET
+        else if (mouseClick_x1 > 90 && mouseClick_x1 < 110)
+        {
+            printf("RETANGULO!!!!!\n");
+            modo = RET;
+        }
+
+        // Botao TRI
+        else if (mouseClick_x1 > 110 && mouseClick_x1 < 130)
+        {
+            printf("TRIANGULO!!!!!\n");
+            modo = TRI;
+        }
+
     }
 }
 
-void trataCliqueBotao(int botao, int height)
-{
-    // Pinta a borda dos botoes
-    int qntBotoes = 3;
-    for (int i = 0; i < 20*qntBotoes; i += 20)
-    {
-        if (i / 20 == botao)
-        {
-            // Botao selecionado (borda vermelha)
-            glColor3f(1.0, 0.0, 0.0);
-        }
-        else
-        {
-            // Botoes nao selecionados (borda branca)
-            glColor3f(1.0, 1.0, 1.0);
-        }
-        
-        glBegin(GL_LINE_LOOP);
-            glVertex2f(51 + i, height - 44);
-            glVertex2f(69 + i, height - 44);
-            glVertex2f(69 + i, height - 27);
-            glVertex2f(51 + i, height - 27);
-        glEnd();
-    }
-}

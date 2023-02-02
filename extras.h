@@ -11,7 +11,9 @@
 // include <cmath>
 
 
-void desenhaExtras(int w, int h) 
+
+
+void desenhaGUI(int w, int h, int modo) 
 {
     // Parte superior da GUI (azul)
     glColor3f(0.0, 0.0, 1.0);
@@ -31,7 +33,7 @@ void desenhaExtras(int w, int h)
     // Botoes
 
         // Espacos
-        int qntBotoes = 3;
+        int qntBotoes = 4;
         for (int i = 0; i < 20*qntBotoes; i += 20)
         {
             // Background (cinza)
@@ -47,26 +49,33 @@ void desenhaExtras(int w, int h)
                 glVertex2f(50 + i, h - 25);
                 glVertex2f(50 + i, h - 45);
             glEnd();
+
+
+            // Bordas
+            if (i / 20 == modo)
+            {
+                // Botao selecionado (borda vermelha)
+                glColor3f(1.0, 0.0, 0.0);
+            }
+            else
+            {
+                // Botoes nao selecionados (borda branca)
+                glColor3f(1.0, 1.0, 1.0);
+            }
+        
+            glBegin(GL_LINE_LOOP);
+                glVertex2f(51 + i, h - 44);
+                glVertex2f(69 + i, h - 44);
+                glVertex2f(69 + i, h - 27);
+                glVertex2f(51 + i, h - 27);
+            glEnd();
         }
             
 
         // Icones
 
             // Mouse
-            /*
-            glColor3f(1.0, 1.0, 1.0);
-            glBegin(GL_LINE_LOOP);
-            //glBegin(GL_POLYGON);
-                glVertex2f(61, h - 42); // 
-                glVertex2f(65, h - 42); // 
-                glVertex2f(62, h - 37); //
-                glVertex2f(65, h - 37);
-                glVertex2f(55, h - 29); // 
-                glVertex2f(55, h - 41);
-                glVertex2f(57, h - 36);
-            glEnd();
-            */
-            glColor3f(0.0, 0.0, 0.0);
+            glColor3f(0.0, 0.0, 0.0);   // Contorno
             glBegin(GL_LINE_LOOP);
                 glVertex2f(61, h - 43); // Comecando de baixo
                 glVertex2f(65, h - 43); // Esquerda - direita
@@ -86,62 +95,93 @@ void desenhaExtras(int w, int h)
                     glVertex2f(87 + i, h - 27);
                 glEnd();
             }
-            
 
+            // Retangulo
+            glColor3f(0.0, 0.0, 0.0);
+            for (int i = 0; i < 2; i++)
+            {
+                glBegin(GL_LINE_LOOP);
+                    glVertex2f( 93 + i, h - 41 + i);
+                    glVertex2f(106 + i, h - 41 + i);
+                    glVertex2f(106 + i, h - 30 - i);
+                    glVertex2f( 93 + i, h - 30 - i);
+                glEnd();
+            }
+
+            // Triangulo
+            glColor3f(0.0, 0.0, 0.0);
+            for (int i = 0; i < 2; i++)
+            {
+                glBegin(GL_LINE_LOOP);
+                    glVertex2f(114 + i, h - 41 + i);
+                    glVertex2f(126 - i, h - 41 + i);
+                    glVertex2f(120, h - 29 - 2*i);
+                glEnd();
+            }
 }
 
 
 
-void atualizaBotao(int botao, int h)
+
+
+
+
+
+void trataCliqueBotao(int botao, int height)
 {
-    /*
-    if (botao == 'L')
+    // Pinta a borda dos botoes
+    int qntBotoes = 4;
+    for (int i = 0; i < 20*qntBotoes; i += 20)
     {
-        glColor3f(1.0, 0.0, 0.0);
-        glBegin(GL_TRIANGLES);
-            glVertex2f(55, h - 45);
-            glVertex2f(70, h - 45);
-            glVertex2f(70, h - 30);
-        glEnd();
-
-        glColor3f(0.0, 0.0, 1.0);
-        glBegin(GL_TRIANGLES);
-            glVertex2f(70, h - 30);
-            glVertex2f(55, h - 30);
-            glVertex2f(55, h - 45);
-        glEnd();
-    }
-    */
-    switch (botao)
-    {
-        case 0:
+        if (i / 20 == botao)
+        {
+            // Botao selecionado (borda vermelha)
             glColor3f(1.0, 0.0, 0.0);
-            glBegin(GL_LINE_LOOP);
-                glVertex2f(50, h - 45);
-                glVertex2f(70, h - 45);
-                glVertex2f(70, h - 26);
-                glVertex2f(50, h - 26);
-            glEnd();
-        break;
+        }
+        else
+        {
+            // Botoes nao selecionados (borda branca)
+            glColor3f(1.0, 1.0, 1.0);
+        }
         
-        case 1:     // LIN
-            //printf("%d ", h-26);
-            glColor3f(1.0, 0.0, 0.0);
-            glBegin(GL_LINE_LOOP);
-                
-                glVertex2f(70, h - 45);
-                glVertex2f(90, h - 45);
-                glVertex2f(90, h - 26);
-                glVertex2f(70, h - 26);
-                
-            glEnd();
-        break;
-
-        default:
-
-        break;
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(51 + i, height - 44);
+            glVertex2f(69 + i, height - 44);
+            glVertex2f(69 + i, height - 27);
+            glVertex2f(51 + i, height - 27);
+        glEnd();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
