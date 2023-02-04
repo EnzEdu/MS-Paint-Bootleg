@@ -33,7 +33,7 @@ void desenhaGUI(int w, int h, int modo)
     // Botoes
 
         // Espacos
-        int qntBotoes = 4;
+        int qntBotoes = 6;
         for (int i = 0; i < 20*qntBotoes; i += 20)
         {
             // Background (cinza)
@@ -118,6 +118,15 @@ void desenhaGUI(int w, int h, int modo)
                     glVertex2f(120, h - 29 - 2*i);
                 glEnd();
             }
+
+            // Circulo
+            glColor3f(0.0, 0.0, 0.0);
+            //circuloBresenham(140, h - 35, 0, 145);
+            glBegin(GL_LINE_LOOP);
+                glVertex2f(140, h-41);
+                glVertex2f(141, h-40);
+                glVertex2f(142, h-39);
+            glEnd();
 }
 
 
@@ -125,33 +134,6 @@ void desenhaGUI(int w, int h, int modo)
 
 
 
-
-
-void trataCliqueBotao(int botao, int height)
-{
-    // Pinta a borda dos botoes
-    int qntBotoes = 4;
-    for (int i = 0; i < 20*qntBotoes; i += 20)
-    {
-        if (i / 20 == botao)
-        {
-            // Botao selecionado (borda vermelha)
-            glColor3f(1.0, 0.0, 0.0);
-        }
-        else
-        {
-            // Botoes nao selecionados (borda branca)
-            glColor3f(1.0, 1.0, 1.0);
-        }
-        
-        glBegin(GL_LINE_LOOP);
-            glVertex2f(51 + i, height - 44);
-            glVertex2f(69 + i, height - 44);
-            glVertex2f(69 + i, height - 27);
-            glVertex2f(51 + i, height - 27);
-        glEnd();
-    }
-}
 
 
 

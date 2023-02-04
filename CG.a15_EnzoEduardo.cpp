@@ -143,7 +143,7 @@ void retaBresenham(double x1, double y1, double x2, double y2);
 void verificaCliqueBotao(int mouseX, int mouseY);
 //void trataCliqueBotao(int botao, int height);
 
-
+void circuloBresenham(double x1, double y1, double x2, double y2);
 
 
 
@@ -204,11 +204,13 @@ void reshape(int w, int h)
     // Definindo o Viewport para o tamanho da janela
     glViewport(0, 0, w, h);
 
-//  width = w;
-// height = h;
+    // Atualiza as variaveis que salvam o tamanho da janela
+    width = w;
+    height = h;
 
     glOrtho (0, w, 0, h, -1 ,1);    // (0,0) no canto inferior da tela,
                                     // independente da resolucao
+    //glOrtho (-(w/2), (w/2), -(h/2), (h/2), -1 ,1);
 }
 
 
@@ -405,7 +407,51 @@ void mouse(int button, int state, int x, int y){
                 break;
 
 
+                case CIR:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
 
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                click1 = false;
+                                pushForma(modo);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushVertice(mouseClick_x2, mouseClick_y2);
+                                printf("%d %d %d %d\n", mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
+                                glutPostRedisplay();
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
+                                glutPostRedisplay();
+                            }
+
+                            printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = true;
+                                glutPostRedisplay();
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                                glutPostRedisplay();
+                            }
+
+                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                        }
+                    }
+                break;
             }
 
         break;
@@ -488,16 +534,74 @@ void menu_popup(int value){
 
 
 
-/*
- * Funcao para desenhar apenas um pixel na tela
- */
-void drawPixel(int x, int y){
-    glBegin(GL_POINTS); // Seleciona a primitiva GL_POINTS para desenhar
-        glVertex2i(x, y);
-    glEnd();  // indica o fim do ponto
+void verificaCliqueBotao(int mouseX, int mouseY)
+{
+    if (mouseY >= height-45 && mouseY <= height-25)
+    {
+        // Botao MOU
+        if (mouseX > 50 && mouseX < 70)
+        {
+            printf("CLIQUE!!!!!\n");
+            modo = MOU;
+            contCoordenadas = 0;
+        }
+
+        // Botao LIN
+        else if (mouseX > 70 && mouseX < 90)
+        {
+            printf("LINHA!!!!!\n");
+            modo = LIN;
+            contCoordenadas = 0;
+        }
+
+        // Botao RET
+        else if (mouseX > 90 && mouseX < 110)
+        {
+            printf("RETANGULO!!!!!\n");
+            modo = RET;
+            contCoordenadas = 0;
+        }
+
+        // Botao TRI
+        else if (mouseX > 110 && mouseX < 130)
+        {
+            printf("TRIANGULO!!!!!\n");
+            modo = TRI;
+            contCoordenadas = 3;
+        }
+
+        // Botao POL
+        else if (mouseX > 130 && mouseX < 150)
+        {
+            printf("POLIGONO!!!!!\n");
+            modo = POL;
+            contCoordenadas = 0;
+        }
+
+        // Botao CIR
+        else if (mouseX > 150 && mouseX < 170)
+        {
+            printf("CIRCULO!!!!!\n");
+            modo = CIR;
+            contCoordenadas = 0;
+        }
+    }
 }
 
 
+/*
+ * Funcao para desenhar apenas um pixel na tela
+ */
+void drawPixel(int x, int y)
+{
+    // Restringe o desenho de pontos para a area de desenho
+    if (y <= height - 50)
+    {
+        glBegin(GL_POINTS); // Seleciona a primitiva GL_POINTS para desenhar
+            glVertex2i(x, y);
+        glEnd();  // indica o fim do ponto
+    }
+}
 
 
 /*
@@ -533,6 +637,11 @@ void drawFormas(){
                     retaBresenham(m_x, m_y, mouseClick_x2, mouseClick_y2);
                 }
             break;
+
+            case CIR:
+                circuloBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                //retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+            break;
         }
     }
 
@@ -563,14 +672,13 @@ void drawFormas(){
                         y[i] = v->y;
                     }
 
-                    // Desenha os quatro lados
+                    // Desenha o retangulo
                     retaBresenham(x[0], y[0], x[1], y[1]);
                     retaBresenham(x[1], y[1], x[2], y[2]);
                     retaBresenham(x[2], y[2], x[3], y[3]);
                     retaBresenham(x[3], y[3], x[0], y[0]);
                 }
             break;
-
             
             case TRI:
                 {
@@ -583,13 +691,28 @@ void drawFormas(){
                         y[i] = v->y;
                     }
 
-                    // Desenha os tres lados
+                    // Desenha o triangulo
                     retaBresenham(x[0], y[0], x[1], y[1]);
                     retaBresenham(x[1], y[1], x[2], y[2]);
                     retaBresenham(x[2], y[2], x[0], y[0]);
                 }
             break;
             
+            case CIR:
+                {
+                    // Listas com os x e y de cada vertice da forma
+                    int i = 0, x[2], y[2];
+
+                    // Itera sob cada forma da lista
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Desenha o circulo
+                    circuloBresenham(x[1], y[1], x[0], y[0]);
+                }
+            break;
 
             default:
             break;
@@ -601,7 +724,7 @@ void drawFormas(){
 
 
 /*
- * Funcao que implementa o Algoritmo de Bresenham de rasterizacao de segmentos de reta
+ * Funcao que implementa o Algoritmo de Bresenham para rasterizacao de segmentos de reta
 */
 void retaBresenham(double x1, double y1, double x2, double y2)
 {
@@ -743,44 +866,149 @@ void retaBresenham(double x1, double y1, double x2, double y2)
 
 
 
-void verificaCliqueBotao(int mouseX, int mouseY)
+/*
+ * Funcao que implementa o Algoritmo de Bresenham para rasterizacao de circunferencias
+*/
+void circuloBresenham(double x1, double y1, double x2, double y2)
 {
-    if (mouseY >= height-45 && mouseY <= height-25)
+    // Coordenadas originais
+    int xCentro = (int) x1;
+    int yCentro = (int) y1;
+    int xRaio   = (int) x2;
+    int yRaio   = (int) y2;
+
+
+    // Variaveis    
+    int d     = 1 - yRaio;
+    int incE  = 3;
+    int incSE = (-2 * yRaio) + 5;
+
+
+    // Algoritmo de Bresenham
+    int bresenhamX, bresenhamY;
+    int Yi = yRaio;
+
+    for (int Xi = 0; Yi > Xi; Xi++)
     {
-        // Botao MOU
-        if (mouseX > 50 && mouseX < 70)
+        // Primeiro ponto e Ultimo ponto
+        if (Xi == 0 || Xi == Yi)
         {
-            printf("CLIQUE!!!!!\n");
-            modo = MOU;
-            contCoordenadas = 0;
+            bresenhamX = Xi;
+            bresenhamY = Yi;
         }
 
-        // Botao LIN
-        else if (mouseX > 70 && mouseX < 90)
+        // Restante
+        else
         {
-            printf("LINHA!!!!!\n");
-            modo = LIN;
-            contCoordenadas = 0;
+            bresenhamX = Xi;
+
+            if (d < 0)
+            {
+                d     += incE;      // Avanco pro Leste
+                incE  += 2;
+                incSE += 2;
+            }
+            else
+            {
+                d     += incSE;     // Avanco pro Sudeste
+                incE  += 2;
+                incSE += 4;
+                Yi--;
+            }
+
+            bresenhamY = Yi;
         }
 
-        // Botao RET
-        else if (mouseX > 90 && mouseX < 110)
+        // Translacao do ponto
+        // Se comentar as duas linhas, funciona perfeitamente com plano cartesiano no meio da tela
+        // bresenhamX += xCentro;
+        // bresenhamY += yCentro;
+
+        
+        // Coordenada a ser rasterizada eh (0,R)
+        /*
+        if (Xi == 0)
         {
-            printf("RETANGULO!!!!!\n");
-            modo = RET;
-            contCoordenadas = 0;
+            //printf("%d\n", bresenhamX);
+            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
+            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
         }
 
-        // Botao TRI
-        else if (mouseX > 110 && mouseX < 130)
+        else
         {
-            printf("TRIANGULO!!!!!\n");
-            modo = TRI;
-            contCoordenadas = 3;
+            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro + bresenhamY, yCentro - bresenhamX);
+            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
+
+            drawPixel(xCentro - bresenhamX, yCentro - bresenhamY);
+            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
+        }
+        */
+
+        if (Xi == 0)
+        {
+            //printf("%d\n", bresenhamX);
+            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
+            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
         }
 
+        else
+        {
+            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro + bresenhamY, yCentro - bresenhamX);
+            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
+
+            drawPixel(xCentro - bresenhamX, yCentro - bresenhamY);
+            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
+        }
+
+        /*
+        if (Xi == 0)
+        {
+            drawPixel( bresenhamX,  bresenhamY);
+            drawPixel( bresenhamX, -bresenhamY);
+            drawPixel( bresenhamY,  bresenhamX);
+            drawPixel(-bresenhamY, -bresenhamX);
+        }
+
+        else
+        {
+            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
+            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
+            drawPixel(xCentro - bresenhamX, yCentro - bresenhamY);
+
+            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
+            drawPixel(xCentro + bresenhamY, yCentro - bresenhamX);
+            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
+
+            
+            putpixel(xc+x, yc+y, RED);
+            putpixel(xc-x, yc+y, RED);
+            putpixel(xc+x, yc-y, RED);
+            putpixel(xc-x, yc-y, RED);
+
+            putpixel(xc+y, yc+x, RED);
+            putpixel(xc-y, yc+x, RED);
+            putpixel(xc+y, yc-x, RED);
+            putpixel(xc-y, yc-x, RED);
+            
+        }
+        */
     }
 }
+
 
 
 
