@@ -72,6 +72,9 @@ int modo = MOU;
 // Largura e altura da janela
 int width = 512, height = 512;
 
+// Contador de vertices?
+int contCoordenadas = 0;
+
 
 
 
@@ -144,6 +147,8 @@ void verificaCliqueBotao(int mouseX, int mouseY);
 
 
 
+
+
 /*
  * Funcao principal
  */
@@ -189,20 +194,21 @@ void init(void){
 
 
 /*
- * Controla o menu pop-up
+ * Ajusta a projecao para o redesenho da janela
  */
-void menu_popup(int value){
-    if (value == 0) exit(EXIT_SUCCESS);
-    modo = value;
-}
+void reshape(int w, int h)
+{
+    glMatrixMode(GL_PROJECTION);    // Muda pro modo de projecao
+    glLoadIdentity();               // Carrega a matriz identidade
 
+    // Definindo o Viewport para o tamanho da janela
+    glViewport(0, 0, w, h);
 
-/*
- * Controle da posicao do cursor do mouse
- */
-void mousePassiveMotion(int x, int y){
-    m_x = x; m_y = height - y - 1;
-    glutPostRedisplay();
+//  width = w;
+// height = h;
+
+    glOrtho (0, w, 0, h, -1 ,1);    // (0,0) no canto inferior da tela,
+                                    // independente da resolucao
 }
 
 
@@ -278,7 +284,7 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
-                                retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                                glutPostRedisplay();
                             }
                             else
                             {
@@ -301,7 +307,7 @@ void mouse(int button, int state, int x, int y){
                             mouseClick_x2 = x;
                             mouseClick_y2 = height - y - 1;
 
-                            if (mouseClick_y1 <= height - 50)
+                            if (mouseClick_y2 <= height - 50)
                             {
                                 click1 = false;
                                 
@@ -329,7 +335,7 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
-                                retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                                glutPostRedisplay();
                             }
                             else
                             {
@@ -342,12 +348,63 @@ void mouse(int button, int state, int x, int y){
                     }
                 break;
 
+
                 case TRI:
                     if (state == GLUT_UP)
                     {
-                        //
+                        if (click1 == true)
+                        {
+                            if (height - y - 1 <= height - 50)
+                            {
+                                contCoordenadas--;
+
+                                if (contCoordenadas == 1)
+                                {
+                                    mouseClick_x2 = x;
+                                    mouseClick_y2 = height - y - 1;
+                                    click1 = true;
+                                    printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                                }
+                                else
+                                {
+                                    pushForma(modo);
+                                    pushVertice(mouseClick_x1, mouseClick_y1);
+                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    pushVertice(x, height - y - 1);
+
+                                    click1 = false;
+                                    printf("Clique 3(%d, %d)\n", x, height - y - 1);
+                                    contCoordenadas = 3;
+                                }
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(x, height - y - 1);
+                                glutPostRedisplay();
+                            }
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                contCoordenadas--;
+                                click1 = true;
+
+                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                                glutPostRedisplay();
+                            }
+                        }
                     }
                 break;
+
+
 
             }
 
@@ -370,21 +427,11 @@ void mouse(int button, int state, int x, int y){
 
 
 /*
- * Ajusta a projecao para o redesenho da janela
+ * Controle da posicao do cursor do mouse
  */
-void reshape(int w, int h)
-{
-    glMatrixMode(GL_PROJECTION);    // Muda pro modo de projecao
-    glLoadIdentity();               // Carrega a matriz identidade
-
-	// Definindo o Viewport para o tamanho da janela
-	glViewport(0, 0, w, h);
-
-//	width = w;
-// height = h;
-
-    glOrtho (0, w, 0, h, -1 ,1);    // (0,0) no canto inferior da tela,
-                                    // independente da resolucao
+void mousePassiveMotion(int x, int y){
+    m_x = x; m_y = height - y - 1;
+    glutPostRedisplay();
 }
 
 
@@ -417,7 +464,7 @@ void display(void)
     */
 
     drawFormas(); // Desenha as formas geometricas da lista
-
+    //printf("contCoord = %d\n", contCoordenadas);
 
     // Atualiza a borda dos botoes
     // de acordo com o modo selecionado
@@ -428,6 +475,14 @@ void display(void)
     glutSwapBuffers(); // manda o OpenGl renderizar as primitivas
 }
 
+
+/*
+ * Controla o menu pop-up
+ */
+void menu_popup(int value){
+    if (value == 0) exit(EXIT_SUCCESS);
+    modo = value;
+}
 
 
 
@@ -442,13 +497,45 @@ void drawPixel(int x, int y){
     glEnd();  // indica o fim do ponto
 }
 
+
+
+
 /*
  *Funcao que desenha a lista de formas geometricas
  */
 void drawFormas(){
-    //Apos o primeiro clique, desenha a reta com a posicao atual do mouse
-    if(click1) retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-    
+
+    // Preview da forma a ser desenhada
+    if (!(click1 == true) ^ (contCoordenadas <= 2))
+    {
+        switch(modo)
+        {
+            case LIN:
+                retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+            break;
+
+            case RET:
+                retaBresenham(mouseClick_x1, mouseClick_y1, mouseClick_x1, m_y);
+                retaBresenham(mouseClick_x1, mouseClick_y1, m_x, mouseClick_y1);
+                retaBresenham(mouseClick_x1, m_y, m_x, m_y);
+                retaBresenham(m_x, mouseClick_y1, m_x, m_y);
+            break;
+
+            case TRI:
+                if (contCoordenadas == 2)
+                {
+                    retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                }
+                else if (contCoordenadas == 1)
+                {
+                    retaBresenham(mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
+                    retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                    retaBresenham(m_x, m_y, mouseClick_x2, mouseClick_y2);
+                }
+            break;
+        }
+    }
+
     //Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
         switch (f->tipo) {
@@ -484,6 +571,26 @@ void drawFormas(){
                 }
             break;
 
+            
+            case TRI:
+                {
+                    // Listas com os x e y de cada vertice da forma
+                    int i = 0, x[3], y[3];
+    
+                    // Itera sob cada forma da lista
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Desenha os tres lados
+                    retaBresenham(x[0], y[0], x[1], y[1]);
+                    retaBresenham(x[1], y[1], x[2], y[2]);
+                    retaBresenham(x[2], y[2], x[0], y[0]);
+                }
+            break;
+            
+
             default:
             break;
         }
@@ -491,214 +598,190 @@ void drawFormas(){
 }
 
 
+
+
 /*
  * Funcao que implementa o Algoritmo de Bresenham de rasterizacao de segmentos de reta
 */
 void retaBresenham(double x1, double y1, double x2, double y2)
 {
-    // Coordenadas
+    // Coordenadas originais
     int xInicio = (int) x1;
     int yInicio = (int) y1;
-    int xFim = (int) x2;
-    int yFim = (int) y2;
-
-    int trueX;
-    int trueY;
+    int xFim    = (int) x2;
+    int yFim    = (int) y2;
+ 
 
 
-    // Verifica se a reta esta no primeiro octante
-
-    // Calcula as variaveis usadas na conversao
-    int varX  = xFim - xInicio;
-    int varY  = yFim - yInicio;
-    int simetrico, declive = 0;
-
-
-    // Testa se o declive da reta eh negativo
-    int coeficienteAngular = varX * varY;
-    if (coeficienteAngular < 0)
-    {
-        simetrico = 1;
-
-        yInicio = (-1)*yInicio;
-        yFim = (-1)*yFim;
-
-        varY = (-1)*varY;
-    }
-
-
-    // Testa se o declive eh maior que 1
-    if (abs(varX) < abs(varY))
-    {
-        declive = 1;
-
-        int tmp;
-        tmp = xInicio;
-        xInicio = yInicio;
-        yInicio = tmp;
-
-        tmp = xFim;
-        xFim = yFim;
-        yFim = tmp;
-        
-        tmp = varX;
-        varX = varY;
-        varY = tmp;
-    }
-
-
-    // Testa se xInicio eh maior que xFim
-    if (xInicio > xFim)
-    {
-        int tmp;
-
-        tmp = xInicio;
-        xInicio = xFim;
-        xFim = tmp;
-
-        tmp = yInicio;
-        yInicio = yFim;
-        yFim = tmp;
-
-        varX = (-1)*varX;
-        varY = (-1)*varY;
-    }
+    // Variaveis - parte 1
+    int variacaoX = xFim - xInicio;
+    int variacaoY = yFim - yInicio;
 
 
 
+    // Reducao ao primeiro octante
+    int tmp;
 
 
-    // Desenha o primeiro extremo
-    trueX = xInicio, trueY = yInicio;
+        // Verifica se o declive eh negativo
+        bool simetrico = false;
 
-    // Transformacao Inversa do mesmo
-    if (declive == 1)
-    {
-        int tmp;
-        tmp = trueX;
-        trueX = trueY;
-        trueY = tmp;
-    }
+        int coeficienteAngular = variacaoX * variacaoY;
+        if (coeficienteAngular < 0)
+        {
+            simetrico = true;
 
-    if (simetrico == 1)
-    {
-        trueY = (-1)*trueY;
-    }
+            // Troca o sinal das coordenadas Y
+            yInicio   *= (-1);
+            yFim      *= (-1);
+            variacaoY *= (-1);
+        }
 
-    drawPixel(trueX, trueY);
+
+        // Verifica se o declive eh superior a 1
+        bool declive = false;
+
+        if (abs(variacaoX) < abs(variacaoY))
+        {
+            declive = true;
+
+            // Troca a posicao de x e y em cada coordenada
+            tmp = xInicio;
+            xInicio = yInicio;
+            yInicio = tmp;
+
+            tmp = xFim;
+            xFim = yFim;
+            yFim = tmp;
+
+            tmp = variacaoX;
+            variacaoX = variacaoY;
+            variacaoY = tmp;
+        }
+
+
+        // Verifica se xInicio eh maior que xFim
+        if (xInicio > xFim)
+        {
+            // Troca a ordem das coordenadas
+            tmp = xInicio;
+            xInicio = xFim;
+            xFim = tmp;
+
+            tmp = yInicio;
+            yInicio = yFim;
+            yFim = tmp;
+
+            variacaoX *= (-1);
+            variacaoY *= (-1);
+        }
+
+
+    // Variaveis - parte 2
+    int d     = (2 * variacaoY) - variacaoX;
+    int incE  = (2 * variacaoY);
+    int incNE = 2 * (variacaoY - variacaoX);
 
 
 
     // Algoritmo de Bresenham
-    int Xi = xInicio, Yi = yInicio;
-    int Di = 0;
-    int Dii = (2*varY) - varX;
-    int incE  = 2*varY;
-    int incNE = 2*(varY - varX);
+    int bresenhamX, bresenhamY;
+    int Yi = yInicio;
 
-    while (Xi < xFim)
+    for (int Xi = xInicio; Xi <= xFim; Xi++)
     {
-        // Incrementa o X(i)
-        Xi++;
-
-        // Identifica D(i)  --- D(i+1) da linha passada ---
-        Di = Dii;
-
-
-        // Acha o avanco
-        if (Di > 0)
+        // Primeiro ponto
+        if (Xi == xInicio)
         {
-            // Avanco NE (acima do ponto medio)
-            Dii = Di + incNE;
-            Yi++;               // Incrementa Y(i)
+            bresenhamX = xInicio;
+            bresenhamY = yInicio;
+        }
 
-        } else
+        // Ultimo ponto
+        else if (Xi == xFim)
         {
-            // Avanco E (em cima e abaixo do ponto medio)
-            Dii = Di + incE;
+            bresenhamX = xFim;
+            bresenhamY = yFim;
+        }
+
+        // Restante
+        else
+        {
+            bresenhamX = Xi;
+
+            if (d <= 0)
+            {
+                d += incE;      // Avanco pro Leste
+            }
+            else
+            {
+                d  += incNE;    // Avanco pro Nordeste
+                Yi += 1;
+            }
+
+            bresenhamY = Yi;
         }
 
 
-
-        // Transformacao Inversa
-
-        // Coordenadas reais
-        int newX = Xi, newY = Yi;
-
-        // Conserta o declive
-        if (declive == 1)
+        // Transformacao inversa
+        if (declive == true)
         {
-            int tmp;
-            tmp = newX;
-            newX = newY;
-            newY = tmp;
+            tmp = bresenhamX;
+            bresenhamX = bresenhamY;
+            bresenhamY = tmp;
         }
 
-        // Conserta a simetria
-        if (simetrico == 1)
+        if (simetrico == true)
         {
-            newY = (-1)*newY;
+            bresenhamY *= (-1);
         }
 
-        // Desenha o ponto com as coordenadas transformadas
-        drawPixel(newX, newY);
+        drawPixel(bresenhamX, bresenhamY);
     }
-
-
-
-    // Desenha o segundo extremo
-    trueX = xFim, trueY = yFim;
-
-    // Transformacao inversa do mesmo
-    if (declive == 1)
-    {
-        int tmp;
-        tmp = trueX;
-        trueX = trueY;
-        trueY = tmp;
-    }
-
-    if (simetrico == 1)
-    {
-        trueY = (-1)*trueY;
-    }
-
-    drawPixel(trueX, trueY);
 }
+
+
+
 
 void verificaCliqueBotao(int mouseX, int mouseY)
 {
-    if (mouseClick_y1 >= height-45 && mouseClick_y1 <= height-25)
+    if (mouseY >= height-45 && mouseY <= height-25)
     {
-
         // Botao MOU
-        if (mouseClick_x1 > 50 && mouseClick_x1 < 70)
+        if (mouseX > 50 && mouseX < 70)
         {
             printf("CLIQUE!!!!!\n");
             modo = MOU;
+            contCoordenadas = 0;
         }
 
         // Botao LIN
-        else if (mouseClick_x1 > 70 && mouseClick_x1 < 90)
+        else if (mouseX > 70 && mouseX < 90)
         {
             printf("LINHA!!!!!\n");
             modo = LIN;
+            contCoordenadas = 0;
         }
 
         // Botao RET
-        else if (mouseClick_x1 > 90 && mouseClick_x1 < 110)
+        else if (mouseX > 90 && mouseX < 110)
         {
             printf("RETANGULO!!!!!\n");
             modo = RET;
+            contCoordenadas = 0;
         }
 
         // Botao TRI
-        else if (mouseClick_x1 > 110 && mouseClick_x1 < 130)
+        else if (mouseX > 110 && mouseX < 130)
         {
             printf("TRIANGULO!!!!!\n");
             modo = TRI;
+            contCoordenadas = 3;
         }
 
     }
 }
+
+
+
 
