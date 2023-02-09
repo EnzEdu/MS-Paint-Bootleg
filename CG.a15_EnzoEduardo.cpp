@@ -48,13 +48,12 @@ using namespace std;
 enum estados_mouse
 {
     MOU = 0,
-    LIN,    // Linha
-//    BAL,
-//    TRI,        // Triangulo
-    RET,        // Retangulo
-    TRI,
-    POL,        // Poligono
-    CIR         // Circulo
+    LIN,         // Linha
+    RET,         // Retangulo
+    TRI,         // Triangulo
+    POL,         // Poligono
+    CIR,         // Circulo
+    BAL
 };
 
 // Verifica se foi realizado o primeiro clique do mouse
@@ -417,11 +416,11 @@ void mouse(int button, int state, int x, int y){
 
                             if (mouseClick_y2 <= height - 50)
                             {
-                                click1 = false;
                                 pushForma(modo);
                                 pushVertice(mouseClick_x1, mouseClick_y1);
                                 pushVertice(mouseClick_x2, mouseClick_y2);
-                                printf("%d %d %d %d\n", mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
+
+                                click1 = false;
                                 glutPostRedisplay();
                             }
                             else
@@ -451,6 +450,14 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
                     }
+
+                    case BAL:
+                        if (state == GLUT_UP)
+                        {
+
+                        }
+                    break;
+
                 break;
             }
 
@@ -585,6 +592,13 @@ void verificaCliqueBotao(int mouseX, int mouseY)
             modo = CIR;
             contCoordenadas = 0;
         }
+
+        else if (mouseX > 170 && mouseX < 190)
+        {
+            printf("BALDE!!!!!\n");
+            modo = BAL;
+            contCoordenadas = 0;
+        }
     }
 }
 
@@ -640,23 +654,24 @@ void drawFormas(){
 
             case CIR:
                 circuloBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                //retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
             break;
         }
     }
 
-    //Percorre a lista de formas geometricas para desenhar
+    // Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
         switch (f->tipo) {
             case LIN:
                 {
+                    // Listas com os x e y de cada vertice da forma
                     int i = 0, x[2], y[2];
-                    //Percorre a lista de vertices da forma linha para desenhar
+
+                    // Percorre a lista de vertices da forma linha para desenhar
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
                     }
-                    //Desenha o segmento de reta apos dois cliques
+                    // Desenha o segmento de reta apos dois cliques
                     retaBresenham(x[0], y[0], x[1], y[1]);
                 }
             break;
@@ -666,7 +681,7 @@ void drawFormas(){
                     // Listas com os x e y de cada vertice da forma
                     int i = 0, x[4], y[4];
 
-                    // Itera sob cada forma da lista
+                    // Salva as coordenadas de cada vertice
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
@@ -685,7 +700,7 @@ void drawFormas(){
                     // Listas com os x e y de cada vertice da forma
                     int i = 0, x[3], y[3];
     
-                    // Itera sob cada forma da lista
+                    // Salva as coordenadas de cada vertice da forma
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
@@ -703,7 +718,7 @@ void drawFormas(){
                     // Listas com os x e y de cada vertice da forma
                     int i = 0, x[2], y[2];
 
-                    // Itera sob cada forma da lista
+                    // Salva as coordenadas de cada vertice da forma
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
@@ -859,6 +874,7 @@ void retaBresenham(double x1, double y1, double x2, double y2)
             bresenhamY *= (-1);
         }
 
+        // Desenha o ponto
         drawPixel(bresenhamX, bresenhamY);
     }
 }
@@ -919,17 +935,12 @@ void circuloBresenham(double x1, double y1, double x2, double y2)
             bresenhamY = Yi;
         }
 
-        // Translacao do ponto
-        // Se comentar as duas linhas, funciona perfeitamente com plano cartesiano no meio da tela
-        // bresenhamX += xCentro;
-        // bresenhamY += yCentro;
 
-        
-        // Coordenada a ser rasterizada eh (0,R)
-        /*
+        // Desenha os pontos (Translacao + Simetria dos Octantes)
+
+        // Coordenada a ser rasterizada eh (0, R)
         if (Xi == 0)
         {
-            //printf("%d\n", bresenhamX);
             drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
             drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
             drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
@@ -948,64 +959,6 @@ void circuloBresenham(double x1, double y1, double x2, double y2)
             drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
             drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
         }
-        */
-
-        if (Xi == 0)
-        {
-            //printf("%d\n", bresenhamX);
-            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
-            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
-            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
-            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
-        }
-
-        else
-        {
-            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
-            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
-            drawPixel(xCentro + bresenhamY, yCentro - bresenhamX);
-            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
-
-            drawPixel(xCentro - bresenhamX, yCentro - bresenhamY);
-            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
-            drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
-            drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
-        }
-
-        /*
-        if (Xi == 0)
-        {
-            drawPixel( bresenhamX,  bresenhamY);
-            drawPixel( bresenhamX, -bresenhamY);
-            drawPixel( bresenhamY,  bresenhamX);
-            drawPixel(-bresenhamY, -bresenhamX);
-        }
-
-        else
-        {
-            drawPixel(xCentro + bresenhamX, yCentro + bresenhamY);
-            drawPixel(xCentro - bresenhamX, yCentro + bresenhamY);
-            drawPixel(xCentro + bresenhamX, yCentro - bresenhamY);
-            drawPixel(xCentro - bresenhamX, yCentro - bresenhamY);
-
-            drawPixel(xCentro + bresenhamY, yCentro + bresenhamX);
-            drawPixel(xCentro - bresenhamY, yCentro + bresenhamX);
-            drawPixel(xCentro + bresenhamY, yCentro - bresenhamX);
-            drawPixel(xCentro - bresenhamY, yCentro - bresenhamX);
-
-            
-            putpixel(xc+x, yc+y, RED);
-            putpixel(xc-x, yc+y, RED);
-            putpixel(xc+x, yc-y, RED);
-            putpixel(xc-x, yc-y, RED);
-
-            putpixel(xc+y, yc+x, RED);
-            putpixel(xc-y, yc+x, RED);
-            putpixel(xc+y, yc-x, RED);
-            putpixel(xc-y, yc-x, RED);
-            
-        }
-        */
     }
 }
 

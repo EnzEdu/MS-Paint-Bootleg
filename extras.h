@@ -33,7 +33,8 @@ void desenhaGUI(int w, int h, int modo)
     // Botoes
 
         // Espacos
-        int qntBotoes = 6;
+        int qntBotoes = 7;
+
         for (int i = 0; i < 20*qntBotoes; i += 20)
         {
             // Background (cinza)
@@ -119,13 +120,70 @@ void desenhaGUI(int w, int h, int modo)
                 glEnd();
             }
 
+
+
             // Circulo
             glColor3f(0.0, 0.0, 0.0);
-            //circuloBresenham(140, h - 35, 0, 145);
-            glBegin(GL_LINE_LOOP);
-                glVertex2f(140, h-41);
-                glVertex2f(141, h-40);
-                glVertex2f(142, h-39);
+            glBegin(GL_POINTS);
+                for (int i = 0; i < 1; i++) {
+
+                    int p0 = 157 + i;
+                    int p1 = 161 - i;
+                    int h0 = h - 42 + i;
+
+                    for (int j = 0; j < 5; j++) {
+                        glVertex2f(p0 + 1*j, h0);
+                    }
+
+                    for (int j = 0; j < 4; j++) {
+                        glVertex2f(p0, h0);
+                        glVertex2f(p1, h0);
+                        p0 -= 1;
+                        p1 += 1;
+                        h0 += 1;
+                    }
+                
+                    for (int j = 0; j < 4; j++) {
+                        glVertex2f(p0, h0);
+                        glVertex2f(p1, h0);
+                        h0 += 1;
+                    }
+
+                    for (int j = 0; j < 4; j++) {
+                        glVertex2f(p0, h0);
+                        glVertex2f(p1, h0);
+                        p0 += 1;
+                        p1 -= 1;
+                        h0 += 1;
+                    }
+
+                    for (int j = 0; j < 5; j++) {
+                        glVertex2f(p0 + 1*j, h0);
+                    }
+                }
+            glEnd();
+
+            // Balde
+            glColor3f(0.0, 0.0, 0.0);
+            glBegin(GL_POINTS);
+
+                // Lata
+                for(int j = 0; j < 10; j++) {
+                    glVertex2f(174    , h-42 + j);
+                    glVertex2f(174 + j, h-42);
+                    glVertex2f(184    , h-33 - j);
+                    glVertex2f(184 - j, h-33);
+                }
+
+                // Alca
+                for (int j = 0; j < 4; j++) {
+                    glVertex2f(176 + j, h-32 + j);
+                    glVertex2f(182 - j, h-32 + j);
+                }
+
+                
+                // Tinta
+
             glEnd();
 }
 
