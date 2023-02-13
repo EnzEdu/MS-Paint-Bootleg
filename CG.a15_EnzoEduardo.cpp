@@ -74,6 +74,8 @@ int width = 512, height = 512;
 // Contador de vertices?
 int contCoordenadas = 0;
 
+// Cor selecionada pro desenho
+float rSelec = 0.0, gSelec = 0.0, bSelec = 0.0;
 
 
 
@@ -87,6 +89,7 @@ struct vertice{
 // Definicao das formas geometricas
 struct forma{
     int tipo;
+    float rCor, gCor, bCor;
     forward_list<vertice> v; //lista encadeada de vertices
 };
 
@@ -98,6 +101,7 @@ forward_list<forma> formas;
 void pushForma(int tipo){
     forma f;
     f.tipo = tipo;
+    f.rCor = rSelec; f.gCor = gSelec; f.bCor = bSelec;
     formas.push_front(f);
 }
 
@@ -108,13 +112,6 @@ void pushVertice(int x, int y){
     v.x = x;
     v.y = y;
     formas.front().v.push_front(v);
-}
-
-//Fucao para armazenar uma Linha na lista de formas geometricas
-void pushLinha(int x1, int y1, int x2, int y2){
-    pushForma(LIN);
-    pushVertice(x1, y1);
-    pushVertice(x2, y2);
 }
 
 
@@ -261,17 +258,20 @@ void mouse(int button, int state, int x, int y){
                             mouseClick_x2 = x;
                             mouseClick_y2 = height - y - 1;
 
-                            // Se o clique nao foi na area de opcoes
+                            // Verifica se o clique nao foi na area de opcoes
                             if (mouseClick_y2 <= height - 50)
                             {
                                 click1 = false;
-                                pushLinha(mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
-                                glutPostRedisplay();
+                                contCoordenadas = 0;
+
+                                pushForma(modo);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushVertice(mouseClick_x2, mouseClick_y2);
                             }
                             else
                             {
+                                // Verifica se o clique foi em algum botao
                                 verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 2(%d, %d)\n",mouseClick_x2,mouseClick_y2);
@@ -285,17 +285,18 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
-                                glutPostRedisplay();
+                                contCoordenadas++;
                             }
                             else
                             {
-                                // Verifica se clicou em algum botao
+                                // Verifica se o clique foi em algum botao
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
+
+                        glutPostRedisplay();
                     }
                 break;
 
@@ -311,19 +312,17 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y2 <= height - 50)
                             {
                                 click1 = false;
+                                contCoordenadas = 0;
                                 
                                 pushForma(modo);
                                 pushVertice(mouseClick_x1, mouseClick_y2);
                                 pushVertice(mouseClick_x2, mouseClick_y2);
                                 pushVertice(mouseClick_x2, mouseClick_y1);
                                 pushVertice(mouseClick_x1, mouseClick_y1);
-
-                                glutPostRedisplay();   
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 2(%d, %d)\n",mouseClick_x2,mouseClick_y2);
@@ -336,16 +335,17 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
-                                glutPostRedisplay();
+                                contCoordenadas++;
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
+
+                        glutPostRedisplay();
                     }
                 break;
 
@@ -381,7 +381,6 @@ void mouse(int button, int state, int x, int y){
                             else
                             {
                                 verificaCliqueBotao(x, height - y - 1);
-                                glutPostRedisplay();
                             }
                         }
                         else
@@ -399,9 +398,75 @@ void mouse(int button, int state, int x, int y){
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                glutPostRedisplay();
                             }
                         }
+
+                        glutPostRedisplay();
+                    }
+                break;
+
+
+                case POL:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                if (contCoordenadas > 4)
+                                {
+                                    if (mouseClick_x2 == mouseClick_x1 && mouseClick_y2 == mouseClick_y1)
+                                    {
+                                        click1 = false;
+                                        contCoordenadas = 0;
+
+                                        pushVertice(mouseClick_x2, mouseClick_y2);
+                                        printf("FIM\n");
+                                    }
+                                    else
+                                    {
+                                        pushVertice(mouseClick_x2, mouseClick_y2);
+                                        contCoordenadas++;
+                                        printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
+                                    }
+                                }
+                                else
+                                {
+                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    contCoordenadas++;
+                                    printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
+                                }
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(x, height - y - 1);
+                            }
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = true;
+                                contCoordenadas++;
+
+                                pushForma(modo);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+
+                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+                        }
+                        
+                        glutPostRedisplay();
                     }
                 break;
 
@@ -416,17 +481,16 @@ void mouse(int button, int state, int x, int y){
 
                             if (mouseClick_y2 <= height - 50)
                             {
+                                click1 = false;
+                                contCoordenadas = 0;
+
                                 pushForma(modo);
                                 pushVertice(mouseClick_x1, mouseClick_y1);
                                 pushVertice(mouseClick_x2, mouseClick_y2);
-
-                                click1 = false;
-                                glutPostRedisplay();
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
@@ -439,16 +503,17 @@ void mouse(int button, int state, int x, int y){
                             if (mouseClick_y1 <= height - 50)
                             {
                                 click1 = true;
-                                glutPostRedisplay();
+                                contCoordenadas++;
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                glutPostRedisplay();
                             }
 
                             printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
+
+                        glutPostRedisplay();
                     }
 
                     case BAL:
@@ -474,7 +539,7 @@ void mouse(int button, int state, int x, int y){
 //                glutPostRedisplay();
 //            }
 //        break;
-            
+//    glutPostRedisplay();        
     }
 }
 
@@ -593,6 +658,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
             contCoordenadas = 0;
         }
 
+        // Botao BAL
         else if (mouseX > 170 && mouseX < 190)
         {
             printf("BALDE!!!!!\n");
@@ -622,9 +688,29 @@ void drawPixel(int x, int y)
  *Funcao que desenha a lista de formas geometricas
  */
 void drawFormas(){
+    /*
+    if (contCoordenadas == 0)       // =========TEMPORARIO========= //
+    {
+        rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;
+    }
+    else
+    {
+        rSelec = 1.0; gSelec = 0.0; bSelec = 0.0;
+    }
+    */
+
+    if (contCoordenadas == 0)
+    {
+        glColor3f(rSelec, gSelec, bSelec);
+    }
+    else
+    {
+        glColor3f(1.0, 0.0, 0.0);
+    }
 
     // Preview da forma a ser desenhada
-    if (!(click1 == true) ^ (contCoordenadas <= 2))
+    //if (!(click1 == true) ^ (contCoordenadas <= 2))
+    if (click1 == true)
     {
         switch(modo)
         {
@@ -652,6 +738,45 @@ void drawFormas(){
                 }
             break;
 
+            case POL:
+                {
+                    forward_list<forma>::iterator f = formas.begin();
+
+                    int numVertices = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++) {
+                        numVertices++;
+                    }
+
+                    int i = 0, x[numVertices], y[numVertices];
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
+                    {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+
+                    // Define a cor de selecao
+                    if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                    {
+                        glColor3f(0.0, 0.0, 1.0);
+                    }
+
+
+                    for (int j = 0; j < numVertices; j++)
+                    {
+                        if (j != numVertices-1)
+                        {
+                            retaBresenham(x[j], y[j], x[j+1], y[j+1]);
+                        }
+                        
+                        if (j == 0)
+                        {
+                            retaBresenham(x[j], y[j], m_x, m_y);
+                        }
+                    }
+                }
+            break;
+
             case CIR:
                 circuloBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
             break;
@@ -660,6 +785,8 @@ void drawFormas(){
 
     // Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
+        glColor3f(f->rCor, f->gCor, f->bCor);
+
         switch (f->tipo) {
             case LIN:
                 {
@@ -713,6 +840,27 @@ void drawFormas(){
                 }
             break;
             
+            case POL:
+                {
+                    int numVertices = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++) {
+                        numVertices++;
+                    }
+
+                    int i = 0, x[numVertices], y[numVertices];
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
+                    {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    for (int j = 0; j < numVertices-1; j++)
+                    {
+                        retaBresenham(x[j], y[j], x[j+1], y[j+1]);
+                    }
+                }
+            break;
+
             case CIR:
                 {
                     // Listas com os x e y de cada vertice da forma
