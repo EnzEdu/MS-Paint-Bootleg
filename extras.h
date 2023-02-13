@@ -15,7 +15,7 @@
 
 void desenhaGUI(int w, int h, int modo) 
 {
-    // Parte superior da GUI (azul)
+    // Area GUI (azul)
     glColor3f(0.0, 0.0, 1.0);
     glBegin(GL_TRIANGLES);
         glVertex2f(0, h - 50);
@@ -53,28 +53,30 @@ void desenhaGUI(int w, int h, int modo)
 
 
             // Bordas
-            if (i / 20 == modo)
-            {
-                // Botao selecionado (borda vermelha)
-                glColor3f(1.0, 0.0, 0.0);
-            }
-            else
-            {
-                // Botoes nao selecionados (borda branca)
-                glColor3f(1.0, 1.0, 1.0);
-            }
+                // Cor
+                if (i / 20 == modo)
+                {
+                    // Botao selecionado (borda vermelha)
+                    glColor3f(1.0, 0.0, 0.0);
+                }
+                else
+                {
+                    // Botoes nao selecionados (borda branca)
+                    glColor3f(1.0, 1.0, 1.0);
+                }
         
-            glBegin(GL_LINE_LOOP);
-                glVertex2f(51 + i, h - 44);
-                glVertex2f(69 + i, h - 44);
-                glVertex2f(69 + i, h - 27);
-                glVertex2f(51 + i, h - 27);
-            glEnd();
+                // Desenho
+                glBegin(GL_LINE_LOOP);
+                    glVertex2f(51 + i, h - 44);
+                    glVertex2f(69 + i, h - 44);
+                    glVertex2f(69 + i, h - 27);
+                    glVertex2f(51 + i, h - 27);
+                glEnd();
         }
             
 
         // Icones
-
+        
             // Mouse
             glColor3f(0.0, 0.0, 0.0);   // Contorno
             glBegin(GL_LINE_LOOP);
@@ -185,6 +187,8 @@ void desenhaGUI(int w, int h, int modo)
                 // Tinta
 
             glEnd();
+
+    glutPostRedisplay();
 }
 
 

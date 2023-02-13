@@ -353,6 +353,7 @@ void mouse(int button, int state, int x, int y){
                 case TRI:
                     if (state == GLUT_UP)
                     {
+                        /*
                         if (click1 == true)
                         {
                             if (height - y - 1 <= height - 50)
@@ -400,6 +401,54 @@ void mouse(int button, int state, int x, int y){
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
                             }
                         }
+                        */
+
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                if (contCoordenadas == 1)
+                                {
+                                    click1 = true;
+                                    contCoordenadas++;
+                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                                }
+                                else
+                                {
+                                    click1 = false;
+                                    contCoordenadas = 0;
+                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    //pushVertice(mouseClick_x1, mouseClick_y1);
+                                    printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                                }
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(x, height - y - 1);
+                            }
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = true;
+                                contCoordenadas++;
+                                pushForma(modo);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+                        }
 
                         glutPostRedisplay();
                     }
@@ -416,27 +465,25 @@ void mouse(int button, int state, int x, int y){
 
                             if (mouseClick_y2 <= height - 50)
                             {
-                                if (contCoordenadas > 4)
+                                if (contCoordenadas > 3)
                                 {
                                     if (mouseClick_x2 == mouseClick_x1 && mouseClick_y2 == mouseClick_y1)
                                     {
                                         click1 = false;
                                         contCoordenadas = 0;
-
                                         pushVertice(mouseClick_x2, mouseClick_y2);
-                                        printf("FIM\n");
                                     }
                                     else
                                     {
-                                        pushVertice(mouseClick_x2, mouseClick_y2);
                                         contCoordenadas++;
+                                        pushVertice(mouseClick_x2, mouseClick_y2);
                                         printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
                                     }
                                 }
                                 else
                                 {
-                                    pushVertice(mouseClick_x2, mouseClick_y2);
                                     contCoordenadas++;
+                                    pushVertice(mouseClick_x2, mouseClick_y2);
                                     printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
                                 }
                             }
@@ -454,10 +501,8 @@ void mouse(int button, int state, int x, int y){
                             {
                                 click1 = true;
                                 contCoordenadas++;
-
                                 pushForma(modo);
                                 pushVertice(mouseClick_x1, mouseClick_y1);
-
                                 printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                             }
                             else
@@ -639,7 +684,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         {
             printf("TRIANGULO!!!!!\n");
             modo = TRI;
-            contCoordenadas = 3;
+            contCoordenadas = 0;
         }
 
         // Botao POL
@@ -688,18 +733,8 @@ void drawPixel(int x, int y)
  *Funcao que desenha a lista de formas geometricas
  */
 void drawFormas(){
-    /*
-    if (contCoordenadas == 0)       // =========TEMPORARIO========= //
-    {
-        rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;
-    }
-    else
-    {
-        rSelec = 1.0; gSelec = 0.0; bSelec = 0.0;
-    }
-    */
 
-    if (contCoordenadas == 0)
+    if (contCoordenadas == 0)       // =========TEMPORARIO========= //
     {
         glColor3f(rSelec, gSelec, bSelec);
     }
@@ -726,11 +761,11 @@ void drawFormas(){
             break;
 
             case TRI:
-                if (contCoordenadas == 2)
+                if (contCoordenadas == 1)
                 {
                     retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
                 }
-                else if (contCoordenadas == 1)
+                else if (contCoordenadas == 2)
                 {
                     retaBresenham(mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
                     retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
@@ -755,7 +790,7 @@ void drawFormas(){
                     }
 
 
-                    // Define a cor de selecao
+                    // Muda a cor do traco ao passar pelo primeiro vertice
                     if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
                     {
                         glColor3f(0.0, 0.0, 1.0);
@@ -826,35 +861,47 @@ void drawFormas(){
                 {
                     // Listas com os x e y de cada vertice da forma
                     int i = 0, x[3], y[3];
-    
-                    // Salva as coordenadas de cada vertice da forma
-                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                        x[i] = v->x;
-                        y[i] = v->y;
-                    }
 
-                    // Desenha o triangulo
-                    retaBresenham(x[0], y[0], x[1], y[1]);
-                    retaBresenham(x[1], y[1], x[2], y[2]);
-                    retaBresenham(x[2], y[2], x[0], y[0]);
-                }
-            break;
-            
-            case POL:
-                {
-                    int numVertices = 0;
-                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++) {
-                        numVertices++;
-                    }
-
-                    int i = 0, x[numVertices], y[numVertices];
+                    // Salva as coordenadas de cada vertice
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
                     }
 
-                    for (int j = 0; j < numVertices-1; j++)
+                    // Desenha o triangulo
+                    for (int j = 0; j < i-1; j++)
+                    {
+                        retaBresenham(x[j], y[j], x[j+1], y[j+1]);
+
+                        if (j == 1 && i == 3)
+                        {
+                            retaBresenham(x[2], y[2], x[0], y[0]);
+                        }
+                    }
+                }
+            break;
+            
+            case POL:
+                {
+                    int numVertices = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++)
+                    {
+                        numVertices++;
+                    }
+
+                    // Listas com os x e y de cada vertice da forma
+                    int i = 0, x[numVertices], y[numVertices];
+                    
+                    // Salva as coordenadas de cada vertice
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
+                    {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Desenha o poligono
+                    for (int j = 0; j < i-1; j++)
                     {
                         retaBresenham(x[j], y[j], x[j+1], y[j+1]);
                     }
@@ -897,17 +944,13 @@ void retaBresenham(double x1, double y1, double x2, double y2)
     int xFim    = (int) x2;
     int yFim    = (int) y2;
  
-
-
     // Variaveis - parte 1
     int variacaoX = xFim - xInicio;
     int variacaoY = yFim - yInicio;
 
 
-
     // Reducao ao primeiro octante
     int tmp;
-
 
         // Verifica se o declive eh negativo
         bool simetrico = false;
@@ -922,7 +965,6 @@ void retaBresenham(double x1, double y1, double x2, double y2)
             yFim      *= (-1);
             variacaoY *= (-1);
         }
-
 
         // Verifica se o declive eh superior a 1
         bool declive = false;
@@ -944,7 +986,6 @@ void retaBresenham(double x1, double y1, double x2, double y2)
             variacaoX = variacaoY;
             variacaoY = tmp;
         }
-
 
         // Verifica se xInicio eh maior que xFim
         if (xInicio > xFim)
@@ -1040,7 +1081,6 @@ void circuloBresenham(double x1, double y1, double x2, double y2)
     int yCentro = (int) y1;
     int xRaio   = (int) x2;
     int yRaio   = (int) y2;
-
 
     // Variaveis    
     int d     = 1 - yRaio;
