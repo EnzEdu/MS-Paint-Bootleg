@@ -130,6 +130,8 @@ void mouse(int button, int state, int x, int y);
 void mousePassiveMotion(int x, int y);
 void drawPixel(int x, int y);
 
+//void drawGUI(int w, int h);
+
 // Funcao que percorre a lista de formas geometricas, desenhando-as na tela
 void drawFormas();
 
@@ -140,6 +142,9 @@ void verificaCliqueBotao(int mouseX, int mouseY);
 //void trataCliqueBotao(int botao, int height);
 
 void circuloBresenham(double x1, double y1, double x2, double y2);
+
+void algoritmoFloodFill(int x1, int y1);
+bool confereCor(int corPixelClick[], int corPixelArea[]);
 
 
 
@@ -185,6 +190,7 @@ int main(int argc, char** argv){
  * Inicializa alguns parametros do GLUT
  */
 void init(void){
+//    glClearColor(1.0, 1.0, 1.0, 1.0); //Limpa a tela com a cor branca;
     glClearColor(1.0, 1.0, 1.0, 1.0); //Limpa a tela com a cor branca;
 }
 
@@ -231,7 +237,6 @@ void mouse(int button, int state, int x, int y){
             switch(modo){
 
                 case MOU:
-
                     // Clique
                     if (state == GLUT_UP)
                     {
@@ -241,13 +246,11 @@ void mouse(int button, int state, int x, int y){
                         verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
                         printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                     } 
-
                     // Segurou
                     else
                     {
                         // Modo de selecionar
                     }
-
                 break;
 
 
@@ -296,7 +299,7 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
 
-                        glutPostRedisplay();
+                        ;
                     }
                 break;
 
@@ -345,7 +348,7 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
 
-                        glutPostRedisplay();
+                        //glutPostRedisplay();
                     }
                 break;
 
@@ -353,56 +356,6 @@ void mouse(int button, int state, int x, int y){
                 case TRI:
                     if (state == GLUT_UP)
                     {
-                        /*
-                        if (click1 == true)
-                        {
-                            if (height - y - 1 <= height - 50)
-                            {
-                                contCoordenadas--;
-
-                                if (contCoordenadas == 1)
-                                {
-                                    mouseClick_x2 = x;
-                                    mouseClick_y2 = height - y - 1;
-                                    click1 = true;
-                                    printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
-                                }
-                                else
-                                {
-                                    pushForma(modo);
-                                    pushVertice(mouseClick_x1, mouseClick_y1);
-                                    pushVertice(mouseClick_x2, mouseClick_y2);
-                                    pushVertice(x, height - y - 1);
-
-                                    click1 = false;
-                                    printf("Clique 3(%d, %d)\n", x, height - y - 1);
-                                    contCoordenadas = 3;
-                                }
-                            }
-                            else
-                            {
-                                verificaCliqueBotao(x, height - y - 1);
-                            }
-                        }
-                        else
-                        {
-                            mouseClick_x1 = x;
-                            mouseClick_y1 = height - y - 1;
-
-                            if (mouseClick_y1 <= height - 50)
-                            {
-                                contCoordenadas--;
-                                click1 = true;
-
-                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
-                            }
-                            else
-                            {
-                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                            }
-                        }
-                        */
-
                         if (click1 == true)
                         {
                             mouseClick_x2 = x;
@@ -450,7 +403,7 @@ void mouse(int button, int state, int x, int y){
                             }
                         }
 
-                        glutPostRedisplay();
+                        //glutPostRedisplay();
                     }
                 break;
 
@@ -511,7 +464,7 @@ void mouse(int button, int state, int x, int y){
                             }
                         }
                         
-                        glutPostRedisplay();
+                        //glutPostRedisplay();
                     }
                 break;
 
@@ -558,16 +511,34 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
 
-                        glutPostRedisplay();
+                        //glutPostRedisplay();
                     }
+                break;
 
-                    case BAL:
-                        if (state == GLUT_UP)
+
+                case BAL:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == false)
                         {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
 
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                pushForma(BAL);
+                                pushVertice(mouseClick_x1, mouseClick_y1);
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+
+                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
-                    break;
 
+                        //glutPostRedisplay();
+                    }
                 break;
             }
 
@@ -575,16 +546,16 @@ void mouse(int button, int state, int x, int y){
 
 //        case GLUT_MIDDLE_BUTTON:
 //            if (state == GLUT_DOWN) {
-//                glutPostRedisplay();
+//                //glutPostRedisplay();
 //            }
 //        break;
 //
 //        case GLUT_RIGHT_BUTTON:
 //            if (state == GLUT_DOWN) {
-//                glutPostRedisplay();
+//                //glutPostRedisplay();
 //            }
 //        break;
-//    glutPostRedisplay();        
+//    //glutPostRedisplay();        
     }
 }
 
@@ -615,6 +586,7 @@ void display(void)
 
     // Carrega o layout do app
     desenhaGUI(wi, he, modo);
+    //drawGUI(wi, he);
 
 
 
@@ -656,7 +628,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
     if (mouseY >= height-45 && mouseY <= height-25)
     {
         // Botao MOU
-        if (mouseX > 50 && mouseX < 70)
+        if (mouseX > 70 && mouseX < 90)
         {
             printf("CLIQUE!!!!!\n");
             modo = MOU;
@@ -664,7 +636,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao LIN
-        else if (mouseX > 70 && mouseX < 90)
+        else if (mouseX > 90 && mouseX < 110)
         {
             printf("LINHA!!!!!\n");
             modo = LIN;
@@ -672,7 +644,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao RET
-        else if (mouseX > 90 && mouseX < 110)
+        else if (mouseX > 110 && mouseX < 130)
         {
             printf("RETANGULO!!!!!\n");
             modo = RET;
@@ -680,7 +652,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao TRI
-        else if (mouseX > 110 && mouseX < 130)
+        else if (mouseX > 130 && mouseX < 150)
         {
             printf("TRIANGULO!!!!!\n");
             modo = TRI;
@@ -688,7 +660,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao POL
-        else if (mouseX > 130 && mouseX < 150)
+        else if (mouseX > 150 && mouseX < 170)
         {
             printf("POLIGONO!!!!!\n");
             modo = POL;
@@ -696,7 +668,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao CIR
-        else if (mouseX > 150 && mouseX < 170)
+        else if (mouseX > 170 && mouseX < 190)
         {
             printf("CIRCULO!!!!!\n");
             modo = CIR;
@@ -704,7 +676,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
         // Botao BAL
-        else if (mouseX > 170 && mouseX < 190)
+        else if (mouseX > 190 && mouseX < 210)
         {
             printf("BALDE!!!!!\n");
             modo = BAL;
@@ -744,7 +716,6 @@ void drawFormas(){
     }
 
     // Preview da forma a ser desenhada
-    //if (!(click1 == true) ^ (contCoordenadas <= 2))
     if (click1 == true)
     {
         switch(modo)
@@ -789,13 +760,11 @@ void drawFormas(){
                         y[i] = v->y;
                     }
 
-
                     // Muda a cor do traco ao passar pelo primeiro vertice
                     if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
                     {
                         glColor3f(0.0, 0.0, 1.0);
                     }
-
 
                     for (int j = 0; j < numVertices; j++)
                     {
@@ -921,6 +890,22 @@ void drawFormas(){
 
                     // Desenha o circulo
                     circuloBresenham(x[1], y[1], x[0], y[0]);
+                }
+            break;
+
+            case BAL:
+                {
+                    // Coordenadas x e y do clique inicial
+                    int x, y;
+
+                    // Salva as coordenadas do vertice do pixel clicado
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++){
+                        x = v->x;
+                        y = v->y;
+                    }
+
+                    // Colore a area
+                    algoritmoFloodFill(x, y);
                 }
             break;
 
@@ -1151,6 +1136,322 @@ void circuloBresenham(double x1, double y1, double x2, double y2)
 }
 
 
+
+
+void algoritmoFloodFill(int x1, int y1)
+{
+    /*
+    glReadBuffer(GL_FRONT);
+
+    // Identifica a cor do pixel clicado
+    int corPixelClick[4];
+    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
+
+
+    // Identifica a cor do pixel atual
+    int corPixelArea[4];
+
+
+
+    glColor3f(1.0, 0.0, 0.0);
+    //printf("a %d %d\n", x1, y1);
+
+    // Itera sob os pixels acima do clicado
+    int y2 = y1 + 1;
+    while (y2 < height - 50)
+    {
+        
+        // Carrega a cor do pixel atual
+        glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        
+        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
+        {
+            //glutSwapBuffers();
+            //drawPixel(x1, y2);
+            
+
+            //glDrawPixels(GL_FRONT_AND_BACK);
+            //drawPixel(x1, y2);
+            //glFlush();
+            y2++;
+        }
+        else
+        {
+            //printf("b\n");
+            //printf("c %d %d\n", x1, y2);
+            break;
+        }
+        
+
+        //y2++;
+
+        //printf("%d %d %d\n", corPixelArea[0], corPixelArea[1], corPixelArea[2]);
+    }
+
+    retaBresenham(x1, y1, x1, y2);
+    */
+
+
+
+
+    /*
+    // Altera o buffer de leitura para o buffer da frente
+    glReadBuffer(GL_FRONT);
+
+
+    // Guarda a cor do pixel clicado
+    int corPixelClick[4];
+    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
+
+    // Guarda a cor do pixel atual
+    int corPixelArea[4];
+
+
+    // Define a cor interna
+//  glColor3f(rSelec, gSelec, bSelec);
+    glColor3f(1.0, 0.0, 0.0);
+
+
+    // Itera sob os pixels acima do clicado
+    int limPixelSuperior = y1 + 1;
+    while (limPixelSuperior <= height - 50)
+    {
+        // Carrega a cor do pixel atual
+        glReadPixels(x1, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        
+        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
+        {
+            // Encontra o pixel limite da esquerda
+            int leftPixelSuperior = x1;
+            while (leftPixelSuperior >= 0)
+            {
+                glReadPixels(leftPixelSuperior, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
+                {
+                    leftPixelSuperior--;
+                    continue;
+                }
+                else
+                {
+
+                    // Encontra o pixel limite da direita
+                    int rightPixelSuperior = x1;
+                    while (rightPixelSuperior <= width)
+                    {
+                        glReadPixels(rightPixelSuperior, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
+                        {
+                            rightPixelSuperior++;
+                            continue;
+                        }
+                        else
+                        {
+                            retaBresenham(leftPixelSuperior, limPixelSuperior, rightPixelSuperior, limPixelSuperior);
+                        }
+
+                        break;
+                    }
+
+                }
+
+                break;
+            }
+
+            limPixelSuperior++;
+        }
+        else
+        {
+            retaBresenham(x1, y1, x1, limPixelSuperior);
+            break;
+        }
+        
+
+        //y2++;
+
+        //printf("%d %d %d\n", corPixelArea[0], corPixelArea[1], corPixelArea[2]);
+    }
+    */
+
+
+
+
+
+
+    // Altera o buffer de leitura para o buffer da frente
+    glReadBuffer(GL_FRONT);
+
+
+    // Guarda a cor do pixel clicado
+    int corPixelClick[4];
+    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
+
+    // Guarda a cor do pixel atual
+    int corPixelArea[4];
+
+
+    // Define a cor interna
+//  glColor3f(rSelec, gSelec, bSelec);
+    glColor3f(1.0, 0.0, 0.0);
+
+
+
+    // Itera sob a parte acima do pixel clicado
+    int y2 = y1 + 1;
+    while (y2 <= height - 50)
+    {
+        // Coordenadas limites das linhas superiores
+        int leftLimSup = x1, rightLimSup = x1;
+
+        glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        if (confereCor(corPixelArea, corPixelClick) == true)
+        {
+
+            // Procura pelo limite na esquerda
+            while (leftLimSup >= 0)
+            {
+                glReadPixels(leftLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                if (confereCor(corPixelArea, corPixelClick) == true)
+                {
+                    leftLimSup--;
+                    continue;
+                }
+
+                else
+                {
+
+                    // Procura pelo limite na direita
+                    while (rightLimSup <= width)
+                    {
+                        glReadPixels(rightLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                        if (confereCor(corPixelArea, corPixelClick) == true)
+                        {
+                            rightLimSup++;
+                            continue;
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+
+            // Desenha retas acima
+            for (int i = leftLimSup; i <= rightLimSup; i++)
+            {
+                drawPixel(i, y2);
+            }
+
+            y2++;
+            continue;
+        }
+
+        break;
+    }
+
+
+    
+    // Itera sob a linha do pixel clicado
+    int leftLimClick = x1, rightLimClick = x1;
+    while (leftLimClick >= 0)
+    {
+        glReadPixels(leftLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        if (confereCor(corPixelArea, corPixelClick) == true)
+        {
+            leftLimClick--;
+            continue;
+        }
+        else
+        {
+            while (rightLimClick <= width)
+            {
+                glReadPixels(rightLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
+                if (confereCor(corPixelArea, corPixelClick) == true)
+                {
+                    rightLimClick++;
+                    continue;
+                }
+
+                retaBresenham(leftLimClick, y1, rightLimClick, y1);
+                break;
+            }
+        }
+
+        for (int i = leftLimClick; i <= rightLimClick; i++)
+        {
+            drawPixel(i, y1);
+        }
+
+        break;
+    }
+
+
+    
+    // Itera sob a parte acima do pixel clicado
+    int y0 = y1 - 1;
+    while (y0 >= 0)
+    {
+        // Coordenadas limites das linhas inferiores
+        int leftLimInf = x1, rightLimInf = x1;
+
+        glReadPixels(x1, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        if (confereCor(corPixelArea, corPixelClick) == true)
+        {
+
+            while (leftLimInf >= 0)
+            {
+                glReadPixels(leftLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                if (confereCor(corPixelArea, corPixelClick) == true)
+                {
+                    leftLimInf--;
+                    continue;
+                }
+
+                else
+                {
+
+                    while (rightLimInf <= width)
+                    {
+                        glReadPixels(rightLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                        if (confereCor(corPixelArea, corPixelClick) == true)
+                        {
+                            rightLimInf++;
+                            continue;
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+
+            // Desenha retas abaixo
+            for (int i = leftLimInf; i <= rightLimInf; i++)
+            {
+                drawPixel(i, y0);
+            }
+
+            y0--;
+            continue;
+        }
+
+        break;
+    }
+    
+}
+
+
+bool confereCor(int corPixelArea[], int corPixelClick[])
+{
+    return (corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]);
+}
 
 
 

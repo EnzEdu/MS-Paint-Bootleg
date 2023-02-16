@@ -40,15 +40,15 @@ void desenhaGUI(int w, int h, int modo)
             // Background (cinza)
             glColor3f(0.57, 0.58, 0.58);
             glBegin(GL_TRIANGLES);
-                glVertex2f(50 + i, h - 45);
                 glVertex2f(70 + i, h - 45);
-                glVertex2f(70 + i, h - 25);
+                glVertex2f(90 + i, h - 45);
+                glVertex2f(90 + i, h - 25);
             glEnd();
 
             glBegin(GL_TRIANGLES);
+                glVertex2f(90 + i, h - 25);
                 glVertex2f(70 + i, h - 25);
-                glVertex2f(50 + i, h - 25);
-                glVertex2f(50 + i, h - 45);
+                glVertex2f(70 + i, h - 45);
             glEnd();
 
 
@@ -67,10 +67,10 @@ void desenhaGUI(int w, int h, int modo)
         
                 // Desenho
                 glBegin(GL_LINE_LOOP);
-                    glVertex2f(51 + i, h - 44);
-                    glVertex2f(69 + i, h - 44);
-                    glVertex2f(69 + i, h - 27);
-                    glVertex2f(51 + i, h - 27);
+                    glVertex2f(71 + i, h - 44);
+                    glVertex2f(89 + i, h - 44);
+                    glVertex2f(89 + i, h - 27);
+                    glVertex2f(71 + i, h - 27);
                 glEnd();
         }
             
@@ -80,13 +80,13 @@ void desenhaGUI(int w, int h, int modo)
             // Mouse
             glColor3f(0.0, 0.0, 0.0);   // Contorno
             glBegin(GL_LINE_LOOP);
-                glVertex2f(61, h - 43); // Comecando de baixo
-                glVertex2f(65, h - 43); // Esquerda - direita
-                glVertex2f(61, h - 38); //
-                glVertex2f(66, h - 37);
-                glVertex2f(54, h - 28); // Ponto mais alto
-                glVertex2f(54, h - 42);
-                glVertex2f(58, h - 38);
+                glVertex2f(81, h - 43); // Comecando de baixo
+                glVertex2f(85, h - 43); // Esquerda - direita
+                glVertex2f(81, h - 38); //
+                glVertex2f(86, h - 37);
+                glVertex2f(74, h - 28); // Ponto mais alto
+                glVertex2f(74, h - 42);
+                glVertex2f(78, h - 38);
             glEnd();
 
             // Reta
@@ -94,8 +94,8 @@ void desenhaGUI(int w, int h, int modo)
             for (int i = 0; i < 2; i++)
             {
                 glBegin(GL_LINES);
-                    glVertex2f(71 + i, h - 43);
-                    glVertex2f(87 + i, h - 27);
+                    glVertex2f(91 + i, h - 43);
+                    glVertex2f(107 + i, h - 27);
                 glEnd();
             }
 
@@ -104,24 +104,53 @@ void desenhaGUI(int w, int h, int modo)
             for (int i = 0; i < 2; i++)
             {
                 glBegin(GL_LINE_LOOP);
-                    glVertex2f( 93 + i, h - 41 + i);
-                    glVertex2f(106 + i, h - 41 + i);
-                    glVertex2f(106 + i, h - 30 - i);
-                    glVertex2f( 93 + i, h - 30 - i);
+                    glVertex2f(113 + i, h - 41 + i);
+                    glVertex2f(126 + i, h - 41 + i);
+                    glVertex2f(126 + i, h - 30 - i);
+                    glVertex2f(113 + i, h - 30 - i);
                 glEnd();
             }
 
+
             // Triangulo
+            /*
             glColor3f(0.0, 0.0, 0.0);
             for (int i = 0; i < 2; i++)
             {
                 glBegin(GL_LINE_LOOP);
-                    glVertex2f(114 + i, h - 41 + i);
-                    glVertex2f(126 - i, h - 41 + i);
-                    glVertex2f(120, h - 29 - 2*i);
+                    glVertex2f(134 + i, h - 41 + i);
+                    glVertex2f(146 - i, h - 41 + i);
+                    glVertex2f(140, h - 29 - 2*i);
                 glEnd();
             }
+            */
+            
+            glColor3f(0.0, 0.0, 0.0);
+            glBegin(GL_POINTS);
+                for (int j = 0; j < 2; j++)
+                {
+                    int p0 = 134 + j;
+                    int p1 = 145 - j;
 
+                    // Base
+                    for (int i = 0; i < 11; i++)
+                    {
+                        glVertex2f(p0 + 1*i - j, h - 41 + j);
+                    }
+
+                    // Aresta esquerda
+                    for (int i = 0; i < 12; i++)
+                    {
+                        glVertex2f(p0 + (0.5)*i, h - 41 + 1*i);
+                    }
+
+                    // Aresta direita
+                    for (int i = 0; i < 12; i++)
+                    {
+                        glVertex2f(p1 - (0.5)*i, h - 41 + 1*i);
+                    }
+                }
+            glEnd();
 
 
             // Circulo
@@ -129,8 +158,8 @@ void desenhaGUI(int w, int h, int modo)
             glBegin(GL_POINTS);
                 for (int i = 0; i < 1; i++) {
 
-                    int p0 = 157 + i;
-                    int p1 = 161 - i;
+                    int p0 = 177 + i;
+                    int p1 = 181 - i;
                     int h0 = h - 42 + i;
 
                     for (int j = 0; j < 5; j++) {
@@ -171,16 +200,16 @@ void desenhaGUI(int w, int h, int modo)
 
                 // Lata
                 for(int j = 0; j < 10; j++) {
-                    glVertex2f(174    , h-42 + j);
-                    glVertex2f(174 + j, h-42);
-                    glVertex2f(184    , h-33 - j);
-                    glVertex2f(184 - j, h-33);
+                    glVertex2f(194    , h-42 + j);
+                    glVertex2f(194 + j, h-42);
+                    glVertex2f(204    , h-33 - j);
+                    glVertex2f(204 - j, h-33);
                 }
 
                 // Alca
                 for (int j = 0; j < 4; j++) {
-                    glVertex2f(176 + j, h-32 + j);
-                    glVertex2f(182 - j, h-32 + j);
+                    glVertex2f(196 + j, h-32 + j);
+                    glVertex2f(202 - j, h-32 + j);
                 }
 
                 
