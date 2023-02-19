@@ -48,12 +48,15 @@ using namespace std;
 enum estados_mouse
 {
     MOU = 0,
-    LIN,         // Linha
-    RET,         // Retangulo
-    TRI,         // Triangulo
-    POL,         // Poligono
-    CIR,         // Circulo
-    BAL
+    LIN,        // Linha
+    RET,        // Retangulo
+    TRI,        // Triangulo
+    POL,        // Poligono
+    CIR,        // Circulo
+    BAL,        // Balde de tinta (Flood Fill)
+    RETc,       // Retangulo      (Rasterizado)
+    TRIc,       // Triangulo      (Rasterizado)
+    POLc        // Poligono       (Rasterizado)
 };
 
 // Verifica se foi realizado o primeiro clique do mouse
@@ -98,20 +101,32 @@ forward_list<forma> formas;
 
 // Funcao para armazenar uma forma geometrica na lista de formas
 // Armazena sempre no inicio da lista
-void pushForma(int tipo){
+void pushForma(int tipo, int tipoadd){
     forma f;
     f.tipo = tipo;
     f.rCor = rSelec; f.gCor = gSelec; f.bCor = bSelec;
-    formas.push_front(f);
+    if (tipoadd == 0) {
+        formas.push_front(f);
+    } else {
+        formas.reverse();
+        formas.push_front(f);
+        formas.reverse();
+    }
 }
 
 // Funcao para armazenar um vertice na forma do inicio da lista de formas geometricas
 // Armazena sempre no inicio da lista
-void pushVertice(int x, int y){
+void pushVertice(int x, int y, int tipoadd){
     vertice v;
     v.x = x;
     v.y = y;
-    formas.front().v.push_front(v);
+    if (tipoadd == 0) {
+        formas.front().v.push_front(v);
+    } else {
+        formas.reverse();
+        formas.front().v.push_front(v);
+        formas.reverse();
+    }
 }
 
 
@@ -146,7 +161,7 @@ void circuloBresenham(double x1, double y1, double x2, double y2);
 void algoritmoFloodFill(int x1, int y1);
 bool confereCor(int corPixelClick[], int corPixelArea[]);
 
-
+void rasterizaPoligono(int coordsX[], int tamX, int coordsY[], int tamY);
 
 
 
@@ -267,9 +282,9 @@ void mouse(int button, int state, int x, int y){
                                 click1 = false;
                                 contCoordenadas = 0;
 
-                                pushForma(modo);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
-                                pushVertice(mouseClick_x2, mouseClick_y2);
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
                             }
                             else
                             {
@@ -317,11 +332,11 @@ void mouse(int button, int state, int x, int y){
                                 click1 = false;
                                 contCoordenadas = 0;
                                 
-                                pushForma(modo);
-                                pushVertice(mouseClick_x1, mouseClick_y2);
-                                pushVertice(mouseClick_x2, mouseClick_y2);
-                                pushVertice(mouseClick_x2, mouseClick_y1);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
                             }
                             else
                             {
@@ -347,8 +362,6 @@ void mouse(int button, int state, int x, int y){
 
                             printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
-
-                        //glutPostRedisplay();
                     }
                 break;
 
@@ -367,15 +380,14 @@ void mouse(int button, int state, int x, int y){
                                 {
                                     click1 = true;
                                     contCoordenadas++;
-                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
                                 }
                                 else
                                 {
                                     click1 = false;
                                     contCoordenadas = 0;
-                                    pushVertice(mouseClick_x2, mouseClick_y2);
-                                    //pushVertice(mouseClick_x1, mouseClick_y1);
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
                                 }
                             }
@@ -393,8 +405,8 @@ void mouse(int button, int state, int x, int y){
                             {
                                 click1 = true;
                                 contCoordenadas++;
-                                pushForma(modo);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                             }
                             else
@@ -424,19 +436,19 @@ void mouse(int button, int state, int x, int y){
                                     {
                                         click1 = false;
                                         contCoordenadas = 0;
-                                        pushVertice(mouseClick_x2, mouseClick_y2);
+                                        pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     }
                                     else
                                     {
                                         contCoordenadas++;
-                                        pushVertice(mouseClick_x2, mouseClick_y2);
+                                        pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                         printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
                                     }
                                 }
                                 else
                                 {
                                     contCoordenadas++;
-                                    pushVertice(mouseClick_x2, mouseClick_y2);
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
                                 }
                             }
@@ -454,8 +466,8 @@ void mouse(int button, int state, int x, int y){
                             {
                                 click1 = true;
                                 contCoordenadas++;
-                                pushForma(modo);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                             }
                             else
@@ -482,9 +494,9 @@ void mouse(int button, int state, int x, int y){
                                 click1 = false;
                                 contCoordenadas = 0;
 
-                                pushForma(modo);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
-                                pushVertice(mouseClick_x2, mouseClick_y2);
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
                             }
                             else
                             {
@@ -510,8 +522,6 @@ void mouse(int button, int state, int x, int y){
 
                             printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
-
-                        //glutPostRedisplay();
                     }
                 break;
 
@@ -526,8 +536,8 @@ void mouse(int button, int state, int x, int y){
 
                             if (mouseClick_y1 <= height - 50)
                             {
-                                pushForma(BAL);
-                                pushVertice(mouseClick_x1, mouseClick_y1);
+                                pushForma(BAL, 1);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 1);
                             }
                             else
                             {
@@ -536,8 +546,107 @@ void mouse(int button, int state, int x, int y){
 
                             printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
+                    }
+                break;
 
-                        //glutPostRedisplay();
+
+                case RETc:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                click1 = false;
+                                contCoordenadas = 0;
+                                
+                                pushForma(modo, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                //pushVertice(mouseClick_x1, mouseClick_y2, 0);
+
+                                /*
+                                pushVertice(mouseClick_x1, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                */
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
+                            }
+
+                            printf("Clique 2(%d, %d)\n",mouseClick_x2,mouseClick_y2);
+                        }
+                        else
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                click1 = true;
+                                contCoordenadas++;
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+
+                            printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
+                        }
+                    }
+                break;
+
+
+                case TRIc:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == false)
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                //
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+
+                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                        }
+                    }
+                break;
+
+
+                case POLc:
+                    if (state == GLUT_UP)
+                    {
+                        if (click1 == false)
+                        {
+                            mouseClick_x1 = x;
+                            mouseClick_y1 = height - y - 1;
+
+                            if (mouseClick_y1 <= height - 50)
+                            {
+                                //
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                            }
+
+                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                        }
                     }
                 break;
             }
@@ -585,7 +694,7 @@ void display(void)
 
 
     // Carrega o layout do app
-    desenhaGUI(wi, he, modo);
+    desenhaGUI(wi, he, modo, rSelec, gSelec, bSelec);
     //drawGUI(wi, he);
 
 
@@ -625,62 +734,139 @@ void menu_popup(int value){
 
 void verificaCliqueBotao(int mouseX, int mouseY)
 {
-    if (mouseY >= height-45 && mouseY <= height-25)
+    // Tratamento da barra de botoes
+
+    // Botao MOU
+    if (mouseX > 70 && mouseX < 90)
     {
-        // Botao MOU
-        if (mouseX > 70 && mouseX < 90)
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("CLIQUE!!!!!\n");
             modo = MOU;
             contCoordenadas = 0;
         }
+    }
 
-        // Botao LIN
-        else if (mouseX > 90 && mouseX < 110)
+    // Botao LIN
+    else if (mouseX > 90 && mouseX < 110)
+    {
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("LINHA!!!!!\n");
             modo = LIN;
             contCoordenadas = 0;
         }
+    }
 
+    else if (mouseX > 110 && mouseX < 130)
+    {
         // Botao RET
-        else if (mouseX > 110 && mouseX < 130)
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("RETANGULO!!!!!\n");
             modo = RET;
             contCoordenadas = 0;
         }
 
+        // Botao RETc
+        else if (mouseY >= height-25 && mouseY <= height-5)
+        {
+            printf("RETANGULO_RASTERIZADO!!!!!\n");
+            modo = RETc;
+            printf("%d\n", RETc);
+            contCoordenadas = 0;
+        }
+    }
+
+    else if (mouseX > 130 && mouseX < 150)
+    {
         // Botao TRI
-        else if (mouseX > 130 && mouseX < 150)
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("TRIANGULO!!!!!\n");
             modo = TRI;
             contCoordenadas = 0;
         }
 
+        // Botao TRIc
+        else if (mouseY >= height-25 && mouseY <= height-5)
+        {
+            printf("TRIANGULO_RASTERIZADO!!!!!\n");
+            modo = TRIc;
+            contCoordenadas = 0;
+        }
+    }
+
+    else if (mouseX > 150 && mouseX < 170)
+    {
         // Botao POL
-        else if (mouseX > 150 && mouseX < 170)
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("POLIGONO!!!!!\n");
             modo = POL;
             contCoordenadas = 0;
         }
 
-        // Botao CIR
-        else if (mouseX > 170 && mouseX < 190)
+        // Botao POLc
+        else if (mouseY >= height-25 && mouseY <= height-5)
+        {
+            printf("POLIGONO_RASTERIZADO!!!!!\n");
+            modo = POLc;
+            contCoordenadas = 0;
+        }
+    }
+
+    // Botao CIR
+    else if (mouseX > 170 && mouseX < 190)
+    {
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("CIRCULO!!!!!\n");
             modo = CIR;
             contCoordenadas = 0;
         }
+    }
 
-        // Botao BAL
-        else if (mouseX > 190 && mouseX < 210)
+    // Botao BAL
+    else if (mouseX > 190 && mouseX < 210)
+    {
+        if (mouseY >= height-45 && mouseY <= height-25)
         {
             printf("BALDE!!!!!\n");
             modo = BAL;
             contCoordenadas = 0;
+        }
+    }
+
+
+    // Tratamento das barras RGB
+    else if (mouseX >= width-90 && mouseX <= width-10)
+    {
+        // Barra R
+        if (mouseY > height-15 && mouseY < height-5)
+        {
+            float corEscolhida[3];
+            glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+            rSelec = corEscolhida[0];
+        }
+
+        // Barra G
+        else if (mouseY > height-30 && mouseY < height-20)
+        {
+            float corEscolhida[3];
+            glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+            gSelec = corEscolhida[1];
+        }
+
+        // Clicou na barra B
+        else if (mouseY >= height-45 && mouseY <= height-35)
+        {
+            float corEscolhida[3];
+            glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+            bSelec = corEscolhida[2];
         }
     }
 }
@@ -823,6 +1009,22 @@ void drawFormas(){
                     retaBresenham(x[1], y[1], x[2], y[2]);
                     retaBresenham(x[2], y[2], x[3], y[3]);
                     retaBresenham(x[3], y[3], x[0], y[0]);
+                }
+            break;
+
+            case RETc:
+                {
+                    // Listas com os x e y de cada vertice da forma
+                    int i = 0, x[4], y[4];
+
+                    // Salva as coordenadas de cada vertice
+                    for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Desenha o retangulo
+                    rasterizaPoligono(x, 4, y, 4);
                 }
             break;
             
@@ -1140,65 +1342,6 @@ void circuloBresenham(double x1, double y1, double x2, double y2)
 
 void algoritmoFloodFill(int x1, int y1)
 {
-    /*
-    glReadBuffer(GL_FRONT);
-
-    // Identifica a cor do pixel clicado
-    int corPixelClick[4];
-    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
-
-
-    // Identifica a cor do pixel atual
-    int corPixelArea[4];
-
-
-
-    glColor3f(1.0, 0.0, 0.0);
-    //printf("a %d %d\n", x1, y1);
-
-    // Itera sob os pixels acima do clicado
-    int y2 = y1 + 1;
-    while (y2 < height - 50)
-    {
-        
-        // Carrega a cor do pixel atual
-        glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        
-        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
-        {
-            //glutSwapBuffers();
-            //drawPixel(x1, y2);
-            
-
-            //glDrawPixels(GL_FRONT_AND_BACK);
-            //drawPixel(x1, y2);
-            //glFlush();
-            y2++;
-        }
-        else
-        {
-            //printf("b\n");
-            //printf("c %d %d\n", x1, y2);
-            break;
-        }
-        
-
-        //y2++;
-
-        //printf("%d %d %d\n", corPixelArea[0], corPixelArea[1], corPixelArea[2]);
-    }
-
-    retaBresenham(x1, y1, x1, y2);
-    */
-
-
-
-
-    /*
-    // Altera o buffer de leitura para o buffer da frente
-    glReadBuffer(GL_FRONT);
-
-
     // Guarda a cor do pixel clicado
     int corPixelClick[4];
     glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
@@ -1208,107 +1351,19 @@ void algoritmoFloodFill(int x1, int y1)
 
 
     // Define a cor interna
-//  glColor3f(rSelec, gSelec, bSelec);
-    glColor3f(1.0, 0.0, 0.0);
+    glColor3f(rSelec, gSelec, bSelec);
 
 
-    // Itera sob os pixels acima do clicado
-    int limPixelSuperior = y1 + 1;
-    while (limPixelSuperior <= height - 50)
-    {
-        // Carrega a cor do pixel atual
-        glReadPixels(x1, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        
-        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
-        {
-            // Encontra o pixel limite da esquerda
-            int leftPixelSuperior = x1;
-            while (leftPixelSuperior >= 0)
-            {
-                glReadPixels(leftPixelSuperior, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
-                {
-                    leftPixelSuperior--;
-                    continue;
-                }
-                else
-                {
-
-                    // Encontra o pixel limite da direita
-                    int rightPixelSuperior = x1;
-                    while (rightPixelSuperior <= width)
-                    {
-                        glReadPixels(rightPixelSuperior, limPixelSuperior, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                        if ((corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]))
-                        {
-                            rightPixelSuperior++;
-                            continue;
-                        }
-                        else
-                        {
-                            retaBresenham(leftPixelSuperior, limPixelSuperior, rightPixelSuperior, limPixelSuperior);
-                        }
-
-                        break;
-                    }
-
-                }
-
-                break;
-            }
-
-            limPixelSuperior++;
-        }
-        else
-        {
-            retaBresenham(x1, y1, x1, limPixelSuperior);
-            break;
-        }
-        
-
-        //y2++;
-
-        //printf("%d %d %d\n", corPixelArea[0], corPixelArea[1], corPixelArea[2]);
-    }
-    */
-
-
-
-
-
-
-    // Altera o buffer de leitura para o buffer da frente
-    glReadBuffer(GL_FRONT);
-
-
-    // Guarda a cor do pixel clicado
-    int corPixelClick[4];
-    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
-
-    // Guarda a cor do pixel atual
-    int corPixelArea[4];
-
-
-    // Define a cor interna
-//  glColor3f(rSelec, gSelec, bSelec);
-    glColor3f(1.0, 0.0, 0.0);
-
-
-
-    // Itera sob a parte acima do pixel clicado
+    // Para cada pixel acima do pixel clicado
     int y2 = y1 + 1;
     while (y2 <= height - 50)
     {
-        // Coordenadas limites das linhas superiores
         int leftLimSup = x1, rightLimSup = x1;
-
         glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
         if (confereCor(corPixelArea, corPixelClick) == true)
         {
-
-            // Procura pelo limite na esquerda
+            // Procura pelo limite esquerdo da linha
             while (leftLimSup >= 0)
             {
                 glReadPixels(leftLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
@@ -1319,33 +1374,30 @@ void algoritmoFloodFill(int x1, int y1)
                     continue;
                 }
 
-                else
+                break;
+            }
+
+            // Procura pelo limite direito da linha
+            while (rightLimSup <= width)
+            {
+                glReadPixels(rightLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                if (confereCor(corPixelArea, corPixelClick) == true)
                 {
-
-                    // Procura pelo limite na direita
-                    while (rightLimSup <= width)
-                    {
-                        glReadPixels(rightLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                        if (confereCor(corPixelArea, corPixelClick) == true)
-                        {
-                            rightLimSup++;
-                            continue;
-                        }
-
-                        break;
-                    }
+                    rightLimSup++;
+                    continue;
                 }
 
                 break;
             }
 
-            // Desenha retas acima
-            for (int i = leftLimSup; i <= rightLimSup; i++)
+            // Desenha a reta do pixel acima
+            for (int i = leftLimSup+1; i < rightLimSup; i++)
             {
                 drawPixel(i, y2);
             }
 
+            // Segue para o pixel de cima
             y2++;
             continue;
         }
@@ -1355,8 +1407,10 @@ void algoritmoFloodFill(int x1, int y1)
 
 
     
-    // Itera sob a linha do pixel clicado
+    // Para o pixel clicado
     int leftLimClick = x1, rightLimClick = x1;
+
+    // Procura pelo limite esquerdo da linha
     while (leftLimClick >= 0)
     {
         glReadPixels(leftLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
@@ -1365,43 +1419,41 @@ void algoritmoFloodFill(int x1, int y1)
             leftLimClick--;
             continue;
         }
-        else
-        {
-            while (rightLimClick <= width)
-            {
-                glReadPixels(rightLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    rightLimClick++;
-                    continue;
-                }
 
-                retaBresenham(leftLimClick, y1, rightLimClick, y1);
-                break;
-            }
-        }
+        break;
+    }
 
-        for (int i = leftLimClick; i <= rightLimClick; i++)
+    // Procura pelo limite direito da linha
+    while (rightLimClick <= width)
+    {
+        glReadPixels(rightLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        if (confereCor(corPixelArea, corPixelClick) == true)
         {
-            drawPixel(i, y1);
+            rightLimClick++;
+            continue;
         }
 
         break;
     }
 
+    // Desenha a linha do pixel clicado
+    for (int i = leftLimClick+1; i < rightLimClick; i++)
+    {
+        drawPixel(i, y1);
+    }
 
     
-    // Itera sob a parte acima do pixel clicado
+
+    // Para cada pixel abaixo do pixel clicado
     int y0 = y1 - 1;
     while (y0 >= 0)
     {
-        // Coordenadas limites das linhas inferiores
         int leftLimInf = x1, rightLimInf = x1;
-
         glReadPixels(x1, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
         if (confereCor(corPixelArea, corPixelClick) == true)
         {
-
+            // Procura pelo limite esquerdo da linha
             while (leftLimInf >= 0)
             {
                 glReadPixels(leftLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
@@ -1412,46 +1464,57 @@ void algoritmoFloodFill(int x1, int y1)
                     continue;
                 }
 
-                else
+                break;
+            }
+
+            // Procura pelo limite direito da linha
+            while (rightLimInf <= width)
+            {
+                glReadPixels(rightLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
+
+                if (confereCor(corPixelArea, corPixelClick) == true)
                 {
-
-                    while (rightLimInf <= width)
-                    {
-                        glReadPixels(rightLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                        if (confereCor(corPixelArea, corPixelClick) == true)
-                        {
-                            rightLimInf++;
-                            continue;
-                        }
-
-                        break;
-                    }
+                    rightLimInf++;
+                    continue;
                 }
 
                 break;
             }
 
-            // Desenha retas abaixo
-            for (int i = leftLimInf; i <= rightLimInf; i++)
+            // Desenha a reta do pixel abaixo
+            for (int i = leftLimInf+1; i < rightLimInf; i++)
             {
                 drawPixel(i, y0);
             }
 
+            // Segue para o pixel de baixo
             y0--;
             continue;
         }
 
         break;
     }
-    
 }
+
+
+
 
 
 bool confereCor(int corPixelArea[], int corPixelClick[])
 {
     return (corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]);
 }
+
+
+
+void rasterizaPoligono(int coordsX[], int tamX, int coordsY[], int tamY)
+{
+    //
+}
+
+
+
+
 
 
 
