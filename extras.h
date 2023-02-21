@@ -1,15 +1,15 @@
 /*
- * Atividade 06 - Computacao Grafica
- * Codigo OpenGL responsavel pelo plano de fundo e outros extras
+ * Atividade 15 - Computacao Grafica
+ * Codigo OpenGL responsavel pela GUI
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 22/12/2022
+ * Data: ??/02/2023
 */
 
 #ifndef extras_h
 #define extras_h
 
 
-void desenhaGUI(int w, int h, int modo, float rSelec, float gSelec, float bSelec) 
+void desenhaGUI(int w, int h, int modoForma, int modoTransf, float rSelec, float gSelec, float bSelec) 
 {
     // Area GUI (azul)
     glColor3f(0.0, 0.0, 1.0);
@@ -136,7 +136,7 @@ void desenhaGUI(int w, int h, int modo, float rSelec, float gSelec, float bSelec
 
             // Bordas
                 // Cor
-                if (i / 20 == modo)
+                if (i / 20 == modoForma)
                 {
                     // Botao selecionado (borda vermelha)
                     glColor3f(1.0, 0.0, 0.0);
@@ -156,6 +156,7 @@ void desenhaGUI(int w, int h, int modo, float rSelec, float gSelec, float bSelec
                 glEnd();
         }
         
+
         // Barra superior
         int qntBotoesInf = 3;
         for (int i = 0; i < 20*qntBotoesInf; i += 20)
@@ -177,7 +178,7 @@ void desenhaGUI(int w, int h, int modo, float rSelec, float gSelec, float bSelec
 
             // Bordas
                 // Cor
-                if ((modo >= 7) && ((i+40) / 20 == modo-5))
+                if ((modoForma >= 7) && ((i+40) / 20 == modoForma-5))
                 {
                     // Botao selecionado (borda vermelha)
                     glColor3f(1.0, 0.0, 0.0);
@@ -197,6 +198,93 @@ void desenhaGUI(int w, int h, int modo, float rSelec, float gSelec, float bSelec
                 glEnd();
         }
 
+
+        // Barra de transformacoes
+        if (modoForma == 0)                  // MOU
+        {
+            int qntBotoesTrans = 5;
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j <= (qntBotoesTrans-i) % 3; j++)
+                {
+                    // Background (cinza)
+                    glColor3f(0.57, 0.58, 0.58);
+                    glBegin(GL_TRIANGLES);
+                        glVertex2f(250 + 20*i, h - 17 - 15*j);
+                        glVertex2f(265 + 20*i, h - 17 - 15*j);
+                        glVertex2f(265 + 20*i, h - 2  - 15*j);
+                    glEnd();
+
+                    glBegin(GL_TRIANGLES);
+                        glVertex2f(265 + 20*i, h - 2  - 15*j);
+                        glVertex2f(250 + 20*i, h - 2  - 15*j);
+                        glVertex2f(250 + 20*i, h - 17 - 15*j);
+                    glEnd();
+
+                    // Bordas
+                        // Cor
+                        if ((i == (modoTransf-10) / 3) && (j == (modoTransf-10) % 3))
+                        {
+                            // Botao selecionado (borda vermelha)
+                            glColor3f(1.0, 0.0, 0.0);
+                        }
+                        else
+                        {
+                            // Botoes nao selecionados (borda branca)
+                            glColor3f(1.0, 1.0, 1.0);
+                        }
+        
+                        // Desenho
+                        glBegin(GL_LINE_LOOP);
+                            glVertex2f(251 + 20*i, h - 16 - 15*j);
+                            glVertex2f(264 + 20*i, h - 16 - 15*j);
+                            glVertex2f(264 + 20*i, h - 4  - 15*j);
+                            glVertex2f(251 + 20*i, h - 4  - 15*j);
+                        glEnd();
+                }
+            }
+            /*
+            for (int i = 140; i < 140+20*(qntBotoesTrans/3); i += 20)
+            {
+                // Background (cinza)
+                glColor3f(0.57, 0.58, 0.58);
+                glBegin(GL_TRIANGLES);
+                    glVertex2f(110 + i, h - 17);
+                    glVertex2f(125 + i, h - 17);
+                    glVertex2f(125 + i, h - 2);
+                glEnd();
+
+                glBegin(GL_TRIANGLES);
+                    glVertex2f(125 + i, h - 2);
+                    glVertex2f(110 + i, h - 2);
+                    glVertex2f(110 + i, h - 17);
+                glEnd();
+                /*
+
+                // Bordas
+                    // Cor
+                    if ((modo >= 7) && ((i+40) / 20 == modo-5))
+                    {
+                        // Botao selecionado (borda vermelha)
+                        glColor3f(1.0, 0.0, 0.0);
+                    }
+                    else
+                    {
+                        // Botoes nao selecionados (borda branca)
+                        glColor3f(1.0, 1.0, 1.0);
+                    }
+        
+                    // Desenho
+                    glBegin(GL_LINE_LOOP);
+                        glVertex2f(111 + i, h - 24);
+                        glVertex2f(129 + i, h - 24);
+                        glVertex2f(129 + i, h -  7);
+                        glVertex2f(111 + i, h -  7);
+                    glEnd();
+            }
+            */
+        }
+        
 
         // Icones        
             // Mouse
