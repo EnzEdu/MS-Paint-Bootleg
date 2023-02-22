@@ -200,7 +200,7 @@ void desenhaGUI(int w, int h, int modoForma, int modoTransf, float rSelec, float
 
 
         // Barra de transformacoes
-        if (modoForma == 0)                  // MOU
+        if (modoForma == 0)                  // Se o modo atual eh MOU
         {
             int qntBotoesTrans = 5;
             for (int i = 0; i < 2; i++)
@@ -243,46 +243,6 @@ void desenhaGUI(int w, int h, int modoForma, int modoTransf, float rSelec, float
                         glEnd();
                 }
             }
-            /*
-            for (int i = 140; i < 140+20*(qntBotoesTrans/3); i += 20)
-            {
-                // Background (cinza)
-                glColor3f(0.57, 0.58, 0.58);
-                glBegin(GL_TRIANGLES);
-                    glVertex2f(110 + i, h - 17);
-                    glVertex2f(125 + i, h - 17);
-                    glVertex2f(125 + i, h - 2);
-                glEnd();
-
-                glBegin(GL_TRIANGLES);
-                    glVertex2f(125 + i, h - 2);
-                    glVertex2f(110 + i, h - 2);
-                    glVertex2f(110 + i, h - 17);
-                glEnd();
-                /*
-
-                // Bordas
-                    // Cor
-                    if ((modo >= 7) && ((i+40) / 20 == modo-5))
-                    {
-                        // Botao selecionado (borda vermelha)
-                        glColor3f(1.0, 0.0, 0.0);
-                    }
-                    else
-                    {
-                        // Botoes nao selecionados (borda branca)
-                        glColor3f(1.0, 1.0, 1.0);
-                    }
-        
-                    // Desenho
-                    glBegin(GL_LINE_LOOP);
-                        glVertex2f(111 + i, h - 24);
-                        glVertex2f(129 + i, h - 24);
-                        glVertex2f(129 + i, h -  7);
-                        glVertex2f(111 + i, h -  7);
-                    glEnd();
-            }
-            */
         }
         
 
