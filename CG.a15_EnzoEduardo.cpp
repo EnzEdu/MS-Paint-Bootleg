@@ -9,7 +9,6 @@
 
 
 
-
 // Bibliotecas utilizadas pelo OpenGL
 #ifdef __APPLE__                        // Mac OS
     #define GL_SILENCE_DEPRECATION
@@ -27,14 +26,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <forward_list>
-#include "glut_text.h"
-#include "extras.h"
 using namespace std;
 
-
-// Teclas do teclado e seus valores ASCII
-#define ESC 27
 
 
 
@@ -42,6 +35,9 @@ using namespace std;
 /*
  * Declaracao de constantes e variaveis globais
 */
+
+// Teclas do teclado e seus valores ASCII
+#define ESC 27
 
 // Enumeracao com os tipos de formas geometricas
 enum tipos_formas
@@ -77,11 +73,11 @@ int m_x, m_y;
 // Coordenadas do primeiro clique e do segundo clique do mouse
 int mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2;
 
+// Largura e altura da janela (variaveis globais de todo o projeto)
+int width = 512, height = 512;
+
 // Indica o tipo de forma geometrica ativa para desenhar
 int modoForma = MOU, modoTransf = 0;
-
-// Largura e altura da janela
-int width = 512, height = 512;
 
 // Contador de vertices?
 int contCoordenadas = 0;
@@ -92,27 +88,17 @@ float rSelec = 0.0, gSelec = 0.0, bSelec = 0.0;
 
 
 
-// Definicao de vertice
-struct vertice
-{
-    int x;
-    int y;
-};
 
-// Definicao das transformacoes geometricas
-struct transformacao
-{
-    int tipo;
-    float vtf[2];       // Vertices de transformacao final
-};
+// Headers do arquivo
+#include "estruturas.h"
+#include "algoritmos.h"
+#include "transformacoes.h"
+#include "extras.h"
+#include "glut_text.h"
 
-// Definicao das formas geometricas
-struct forma{
-    int tipo;
-    float rCor, gCor, bCor;
-    forward_list<vertice> v;                        // Lista encadeada de vertices
-    forward_list<transformacao> t;                  // Lista encadeada de transformacoes
-};
+
+
+
 
 // Lista encadeada de formas geometricas
 forward_list<forma> formas;
@@ -172,7 +158,7 @@ void pushTransformacao(int tipo, float valores[2])
 
 /*
  * Declaracoes antecipadas (forward) das funcoes (assinaturas das funcoes)
- */
+*/
 void init(void);
 void reshape(int w, int h);
 void display(void);
@@ -182,37 +168,27 @@ void mouse(int button, int state, int x, int y);
 void mousePassiveMotion(int x, int y);
 void drawPixel(int x, int y);
 
-// Funcao que percorre a lista de transformacoes geometricas, aplicando-as na tela
-void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transformacao>::iterator tr);
+// Funcao que trata da mudanca de estado de desenho
+void verificaCliqueBotao(int mouseX, int mouseY);
 
 // Funcao que percorre a lista de formas geometricas, desenhando-as na tela
 void drawFormas();
 
-// Funcao que implementa o Algoritmo de Bresenham para rasterizacao de segmentos de retas
-forward_list<vertice> retaBresenham(double x1, double y1, double x2, double y2);
+// Funcao que percorre a lista de transformacoes geometricas de cada forma, aplicando-as nas coordenadas
+void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transformacao>::iterator tr);
 
-void verificaCliqueBotao(int mouseX, int mouseY);
-//void trataCliqueBotao(int botao, int height);
 
-forward_list<vertice> circuloBresenham(double x1, double y1, double x2, double y2);
-
-forward_list<vertice> algoritmoFloodFill(int x1, int y1);
-bool confereCor(int corPixelClick[], int corPixelArea[]);
-
-void rasterizaPoligono(int coordsX[], int tamX, int coordsY[], int tamY);
 
 
 
 /*
  * Funcao principal
- */
+*/
 int main(int argc, char** argv){
 
     glutInit(&argc, argv);                          // Passagem de parametros C para o glut
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);    // Selecao do modo do Display e do sistema de Cor utilizado
-    //glutInitWindowSize(768, 512);                   // Tamanho da janela do OpenGL
     glutInitWindowSize(width, height);              // Tamanho da janela do OpenGL
-//    glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));              // Tamanho da janela do OpenGL
     glutInitWindowPosition(700, 100);               // Posicao inicial da janela do OpenGL
     glutCreateWindow("Computacao Grafica: Paint");  // Da nome para uma janela OpenGL
 
@@ -243,7 +219,6 @@ int main(int argc, char** argv){
  * Inicializa alguns parametros do GLUT
  */
 void init(void){
-//    glClearColor(1.0, 1.0, 1.0, 1.0); //Limpa a tela com a cor branca;
     glClearColor(1.0, 1.0, 1.0, 1.0); //Limpa a tela com a cor branca;
 }
 
@@ -340,106 +315,20 @@ void mouse(int button, int state, int x, int y){
                                     }
                                 }
                             break;
-                            /*
+                            
                             case CISA:
                                 {
                                     if (mouseClick_y1 <= height - 50)
                                     {
-                                        float cisalha_x = 0.0, cisalha_y = 0.0;
-                                        printf("Digite os valores de x e y: ");
-                                        scanf("%f %f", &cisalha_x, &cisalha_y);
+                                        char dados[2];
+                                        printf("Digite o eixo e o valor de deslocamento (ex: \"x 3\"): ");
+                                        scanf(" %c %c", &dados[0], &dados[1]);
 
-                                        // Matriz de cisalhamento
-                                        float matriz[4][4] = {1,         cisalha_y, 0, 0,
-                                                              cisalha_x, 1,         0, 0,
-                                                              0,         0,         1, 0,
-                                                              0,         0,         0, 1};
-
-                                        pushTransf(CISA, matriz);
-                                        printf("ADICIONOU!!!!!!\n");
-                                    }
-                                    else
-                                    {
-                                        verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                    }
-                                }
-                            break;
-
-                            case REFL:
-                                {
-                                    if (mouseClick_y1 <= height - 50)
-                                    {
-                                        char reflex_plano;
-                                        printf("Digite o eixo de reflexao em caixa baixa (ex: x, y, 0): ");
-                                        scanf(" %c", &reflex_plano);
-
-                                        // Matriz de reflexao
-                                        //float matriz[4][4];
-                                        switch (reflex_plano)
-                                        {
-                                            case 'x':
-                                                {
-                                                    GLfloat matrix[16];
-                                                    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-
-                                                    float matriz[4][4] = {1,  0, 0, 0,
-                                                                          0, -1, 0, 0,
-                                                                          0,  0, 1, 0,
-                                                                          0,  0, 0, 1};
-                                                    pushTransf(REFL, matriz);
-                                                    printf("ADICIONOU!!!!!!\n");
-                                                }
-                                            break;
-
-                                            case 'y':
-                                                {
-                                                    float matriz[4][4] = {-1, 0, 0, 0,
-                                                                           0, 1, 0, 0,
-                                                                           0, 0, 1, 0,
-                                                                           0, 0, 0, 1};
-                                                    pushTransf(REFL, matriz);
-                                                    printf("ADICIONOU!!!!!!\n");
-                                                }
-                                            break;
-
-                                            case '0':
-                                                {
-                                                    float matriz[4][4] = {-1,  0, 0, 0,
-                                                                           0, -1, 0, 0,
-                                                                           0,  0, 1, 0,
-                                                                           0,  0, 0, 1};
-                                                    pushTransf(REFL, matriz);
-                                                    printf("ADICIONOU!!!!!!\n");
-                                                }
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
-                                    }
-                                }
-                            break;
-                            */
-                            case ROTA:
-                                {
-                                    if (mouseClick_y1 <= height - 50)
-                                    {
-                                        //float vetorDeslocamento[2];
-                                        int grauRotacao;
-                                        printf("Digite o grau de rotacao: ");
-                                        scanf("%d", &grauRotacao);
-
-                                        // Converte graus em radianos
-                                        // (funcoes trig da math.h trabalham com radianos)
                                         float vetorDeslocamento[2];
-                                        /*
-                                        vetorDeslocamento[0] = grauRotacao * M_PI / 180.0;
-                                        vetorDeslocamento[1] = grauRotacao * M_PI / 180.0;
-                                        */
-                                        vetorDeslocamento[0] = grauRotacao;
-                                        vetorDeslocamento[1] = grauRotacao;
-                                        pushTransformacao(ROTA, vetorDeslocamento);
+                                        vetorDeslocamento[0] = (float) dados[0];
+                                        vetorDeslocamento[1] = (float) dados[1];
+
+                                        pushTransformacao(CISA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
                                     }
                                     else
@@ -449,6 +338,52 @@ void mouse(int button, int state, int x, int y){
                                 }
                             break;
                             
+                            case REFL:
+                                {
+                                    if (mouseClick_y1 <= height - 50)
+                                    {
+                                        char eixo;
+                                        printf("Digite o eixo (\"x\", \"y\" ou \"0\"): ");
+                                        scanf(" %c", &eixo);
+
+                                        float vetorDeslocamento[2];
+                                        vetorDeslocamento[0] = (float) eixo;
+                                        vetorDeslocamento[1] = 0;
+
+                                        pushTransformacao(REFL, vetorDeslocamento);
+                                        printf("ADICIONOU!!!!!!\n");
+                                    }
+                                    else
+                                    {
+                                        verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                                    }
+                                }
+                            break;
+                            
+                            case ROTA:
+                                {
+                                    if (mouseClick_y1 <= height - 50)
+                                    {
+                                        int grauRotacao;
+                                        printf("Digite o grau de rotacao: ");
+                                        scanf("%d", &grauRotacao);
+
+                                        // Converte graus em radianos
+                                        // (funcoes trig da math.h trabalham com radianos)
+                                        float vetorDeslocamento[2];
+                                        
+                                        vetorDeslocamento[0] = grauRotacao * M_PI / 180.0;
+                                        vetorDeslocamento[1] = 0;
+
+                                        pushTransformacao(ROTA, vetorDeslocamento);
+                                        printf("ADICIONOU!!!!!!\n");
+                                    }
+                                    else
+                                    {
+                                        verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
+                                    }
+                                }
+                            break;
                         }
                     }
                     // Segurou
@@ -837,13 +772,10 @@ void display(void)
 
 
     // Carrega a GUI do app
-    desenhaGUI(wi, he, modoForma, modoTransf, rSelec, gSelec, bSelec);
+    desenhaGUI();
 
-
-    // Carrega transformacoes geometricas
-    glLoadIdentity();
-    //desenhaTransformacoes();
-    drawFormas();                   // Desenha as formas geometricas da lista
+    // Desenha as formas geometricas da lista
+    drawFormas();
 
 
     /*
@@ -851,11 +783,8 @@ void display(void)
     draw_text_stroke(0, 0, "(" + to_string(m_x) + "," + to_string(m_y) + ")", 0.2);
     */
 
-
-
-
-
-    glutSwapBuffers(); // manda o OpenGl renderizar as primitivas
+    // Troca os buffers
+    glutSwapBuffers();
 }
 
 
@@ -1088,12 +1017,15 @@ void drawPixel(int x, int y)
  */
 void drawFormas()
 {
-    if (contCoordenadas == 0)       // =========TEMPORARIO========= //
+    // Altera a cor das linhas conforme durante o processo de desenho
+    if (contCoordenadas == 0)
     {
+        // Desenho concluido = usa a cor escolhida
         glColor3f(rSelec, gSelec, bSelec);
     }
     else
     {
+        // Desenho em progresso = cor vermelha
         glColor3f(1.0, 0.0, 0.0);
     }
 
@@ -1173,20 +1105,20 @@ void drawFormas()
                     forward_list<forma>::iterator f = formas.begin();
 
                     // Conta o numero atual de vertices do poligono
-                    int numVertices = 0;
-                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++) {
-                        numVertices++;
-                    }
+                    int numVertices = distance(f->v.begin(), f->v.end());
+
+                    // Listas com os x e y de cada vertice da forma
+                    float x[numVertices], y[numVertices];
 
                     // Salva todas as coordenadas
-                    int i = 0, x[numVertices], y[numVertices];
+                    int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
                     }
 
-                    // Muda a cor do traco ao passar pelo primeiro vertice
+                    // Muda a cor das linhas ao passar pelo vertice inicial
                     if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
                     {
                         glColor3f(0.0, 0.0, 1.0);
@@ -1233,13 +1165,21 @@ void drawFormas()
             case LIN:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[2], y[2];
+                    float x[2], y[2];
 
                     // Salva as coordenadas de cada vertice
+                    int i = 0;
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                    {
+                        aplicaTransformacao(&x[0], &y[0], tr);
+                        aplicaTransformacao(&x[1], &y[1], tr);
                     }
 
                     // Desenha o segmento de reta
@@ -1248,13 +1188,6 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        
-                        // Aplica as transformacoes armazenadas na forma
-                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                        {
-                            aplicaTransformacao(&desenhoX, &desenhoY, tr);
-                        }
-
                         drawPixel(desenhoX, desenhoY);
                     }
                 }
@@ -1263,12 +1196,22 @@ void drawFormas()
             case RET:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[4], y[4];
+                    float x[4], y[4];
 
                     // Salva as coordenadas de cada vertice
+                    int i = 0;
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < 4; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
                     }
 
                     // Desenha o retangulo
@@ -1284,17 +1227,10 @@ void drawFormas()
                             vertices = retaBresenham(x[k], y[k], x[0], y[0]);
                         }
 
-                        // Aplica as transformacoes armazenadas na forma
                         for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                         {
                             float desenhoX = v->x;
                             float desenhoY = v->y;
-                        
-                            for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                            {
-                                aplicaTransformacao(&desenhoX, &desenhoY, tr);
-                            }
-
                             drawPixel(desenhoX, desenhoY);
                         }
                     }
@@ -1304,12 +1240,22 @@ void drawFormas()
             case TRI:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[3], y[3];
+                    float x[3], y[3];
 
                     // Salva as coordenadas de cada vertice
+                    int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++) {
                         x[i] = v->x;
                         y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
                     }
 
                     // Desenha o triangulo
@@ -1327,18 +1273,10 @@ void drawFormas()
                                 vertices = retaBresenham(x[j], y[j], x[0], y[0]);
                             }
 
-                            // Aplica as transformacoes armazenadas na forma
                             for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                             {
                                 float desenhoX = v->x;
                                 float desenhoY = v->y;
-                            
-                                for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                                {
-                                    desenhoX += tr->vtf[0];
-                                    desenhoY += tr->vtf[1];
-                                }
-                            
                                 drawPixel(desenhoX, desenhoY);
                             }
                         }
@@ -1348,39 +1286,39 @@ void drawFormas()
             
             case POL:
                 {
-                    int numVertices = 0;
-                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++)
-                    {
-                        numVertices++;
-                    }
+                    // Conta o numero atual de vertices do poligono
+                    int numVertices = distance(f->v.begin(), f->v.end());
 
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[numVertices], y[numVertices];
+                    float x[numVertices], y[numVertices];
                     
                     // Salva as coordenadas de cada vertice
+                    int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
                     }
 
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < numVertices; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
+                    }
+
                     // Desenha o poligono
                     forward_list<vertice> vertices;
-                    for (int j = 0; j < i-1; j++)
+                    for (int j = 0; j < numVertices-1; j++)
                     {
                         vertices = retaBresenham(x[j], y[j], x[j+1], y[j+1]);
+
                         for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                         {
                             float desenhoX = v->x;
                             float desenhoY = v->y;
-                        
-                            // Aplica as transformacoes armazenadas na forma
-                            for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                            {
-                                desenhoX += tr->vtf[0];
-                                desenhoY += tr->vtf[1];
-                            }
-
                             drawPixel(desenhoX, desenhoY);
                         }
                     }
@@ -1390,12 +1328,22 @@ void drawFormas()
             case CIR:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[2], y[2];
+                    int i = 0;
+                    float x[2], y[2];
 
                     // Salva as coordenadas de cada vertice da forma
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
                     }
 
                     // Desenha a circunferencia
@@ -1404,14 +1352,6 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        
-                        // Aplica as transformacoes armazenadas na forma
-                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                        {
-                            desenhoX += tr->vtf[0];
-                            desenhoY += tr->vtf[1];
-                        }
-
                         drawPixel(desenhoX, desenhoY);
                     }
                 }
@@ -1420,12 +1360,19 @@ void drawFormas()
             case BAL:
                 {
                     // Coordenadas x e y do clique inicial
-                    int x, y;
+                    float x, y;
 
                     // Salva as coordenadas do vertice do pixel clicado
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++){
                         x = v->x;
                         y = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                    {
+                        aplicaTransformacao(&x, &y, tr);
+                        aplicaTransformacao(&x, &y, tr);
                     }
 
                     // Colore a area
@@ -1434,23 +1381,16 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        
-                        // Aplica as transformacoes armazenadas na forma
-                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
-                        {
-                            desenhoX += tr->vtf[0];
-                            desenhoY += tr->vtf[1];
-                        }
-
                         drawPixel(desenhoX, desenhoY);
                     }
                 }
             break;
-
+            /*
             case RETc:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0, x[4], y[4];
+                    int i = 0
+                    float x[4], y[4];
 
                     // Salva as coordenadas de cada vertice
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
@@ -1458,11 +1398,20 @@ void drawFormas()
                         y[i] = v->y;
                     }
 
-                    // Desenha o retangulo rasterizado
-                    //rasterizaPoligono(x, 4, y, 4);
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < 4; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
+                    }
+
+                    // Desenha o retangulo
+                    //
                 }
             break;
-
+            */
             default:
             break;
         }
@@ -1470,7 +1419,6 @@ void drawFormas()
 }
 
 
-// aplicaTransformacao(&desenhoX, &desenhoY, ...);
 void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transformacao>::iterator tr)
 {
     // Aplica a transformacao geometrica com base no tipo
@@ -1478,500 +1426,36 @@ void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transfor
     {
         case TRAN:
             {
-                *desenhoX = (*desenhoX + tr->vtf[0]);
-                *desenhoY = (*desenhoY + tr->vtf[1]);
+                translacao(desenhoX, desenhoY, tr->vtf[0], tr->vtf[1]);
             }
         break;
 
         case ESCA:
             {
-                *desenhoX = (*desenhoX * tr->vtf[0]);
-                *desenhoY = (*desenhoY * tr->vtf[1]);
+                escala(desenhoX, desenhoY, tr->vtf[0], tr->vtf[1]);
             }
         break;
 
         case CISA:
             {
-                *desenhoX = 0;
-                *desenhoY = 0;
+                cisalhamento(desenhoX, desenhoY, tr->vtf[0], tr->vtf[1]);
             }
         break;
 
         case REFL:
             {
-                *desenhoX = 0;
-                *desenhoY = 0;
+                reflexao(desenhoX, desenhoY, tr->vtf[0]);
             }
         break;
 
         case ROTA:
             {
-                //*desenhoX -= centroideX;
-                //*desenhoY -= centroideY;
+                float centroideX = width/2, centroideY = height/2;
 
-                float antX = *desenhoX, antY = *desenhoY;
-                float tempX = (antX * cos(tr->vtf[0] * M_PI / 180.0) - antY * sin(tr->vtf[1] * M_PI / 180.0));
-                float tempY = (antX * sin(tr->vtf[0] * M_PI / 180.0) + antY * cos(tr->vtf[1] * M_PI / 180.0));
-
-                *desenhoX = tempX;
-                *desenhoY = tempY;
-
-                //*desenhoX += centroideX;
-                //*desenhoY += centroideY;
-
-                //printf("%.2f, %.2f\n", *desenhoX, *desenhoY);
+                translacao(desenhoX, desenhoY, -centroideX, -centroideY);
+                rotacao(desenhoX, desenhoY, tr->vtf[0]);
+                translacao(desenhoX, desenhoY, centroideX, centroideY);
             }
         break;
     }
 }
-
-/*
- * Funcao que implementa o Algoritmo de Bresenham para rasterizacao de segmentos de reta
-*/
-forward_list<vertice> retaBresenham(double x1, double y1, double x2, double y2)
-{
-    // Lista de vertices a serem desenhados
-    forward_list<vertice> listaVertices;
-
-    // Coordenadas originais
-    int xInicio = (int) x1;
-    int yInicio = (int) y1;
-    vertice v1; v1.x = x1; v1.y = y1;
-    listaVertices.push_front(v1);
-
-    int xFim    = (int) x2;
-    int yFim    = (int) y2;
-    vertice v2; v2.x = x2; v2.y = y2;
-    listaVertices.push_front(v2);
- 
-    // Variaveis - parte 1
-    int variacaoX = xFim - xInicio;
-    int variacaoY = yFim - yInicio;
-
-
-    // Reducao ao primeiro octante
-    int tmp;
-
-        // Verifica se o declive eh negativo
-        bool simetrico = false;
-
-        int coeficienteAngular = variacaoX * variacaoY;
-        if (coeficienteAngular < 0)
-        {
-            simetrico = true;
-
-            // Troca o sinal das coordenadas Y
-            yInicio   *= (-1);
-            yFim      *= (-1);
-            variacaoY *= (-1);
-        }
-
-        // Verifica se o declive eh superior a 1
-        bool declive = false;
-
-        if (abs(variacaoX) < abs(variacaoY))
-        {
-            declive = true;
-
-            // Troca a posicao de x e y em cada coordenada
-            tmp = xInicio;
-            xInicio = yInicio;
-            yInicio = tmp;
-
-            tmp = xFim;
-            xFim = yFim;
-            yFim = tmp;
-
-            tmp = variacaoX;
-            variacaoX = variacaoY;
-            variacaoY = tmp;
-        }
-
-        // Verifica se xInicio eh maior que xFim
-        if (xInicio > xFim)
-        {
-            // Troca a ordem das coordenadas
-            tmp = xInicio;
-            xInicio = xFim;
-            xFim = tmp;
-
-            tmp = yInicio;
-            yInicio = yFim;
-            yFim = tmp;
-
-            variacaoX *= (-1);
-            variacaoY *= (-1);
-        }
-
-
-    // Variaveis - parte 2
-    int d     = (2 * variacaoY) - variacaoX;
-    int incE  = (2 * variacaoY);
-    int incNE = 2 * (variacaoY - variacaoX);
-
-
-
-    // Algoritmo de Bresenham
-    int bresenhamX, bresenhamY;
-    int Yi = yInicio;
-
-    for (int Xi = xInicio; Xi <= xFim; Xi++)
-    {
-        // Primeiro ponto
-        if (Xi == xInicio)
-        {
-            bresenhamX = xInicio;
-            bresenhamY = yInicio;
-        }
-
-        // Ultimo ponto
-        else if (Xi == xFim)
-        {
-            bresenhamX = xFim;
-            bresenhamY = yFim;
-        }
-
-        // Restante
-        else
-        {
-            bresenhamX = Xi;
-
-            if (d <= 0)
-            {
-                d += incE;      // Avanco pro Leste
-            }
-            else
-            {
-                d  += incNE;    // Avanco pro Nordeste
-                Yi += 1;
-            }
-
-            bresenhamY = Yi;
-        }
-
-
-        // Transformacao inversa
-        if (declive == true)
-        {
-            tmp = bresenhamX;
-            bresenhamX = bresenhamY;
-            bresenhamY = tmp;
-        }
-
-        if (simetrico == true)
-        {
-            bresenhamY *= (-1);
-        }
-
-        // Desenha o ponto
-        //drawPixel(bresenhamX, bresenhamY);
-
-        vertice v;
-        v.x = bresenhamX;
-        v.y = bresenhamY;
-        listaVertices.push_front(v);
-    }
-
-    return listaVertices;
-}
-
-
-
-
-/*
- * Funcao que implementa o Algoritmo de Bresenham para rasterizacao de circunferencias
-*/
-forward_list<vertice> circuloBresenham(double x1, double y1, double x2, double y2)
-{
-    // Lista de vertices a serem desenhados
-    forward_list<vertice> listaVertices;
-
-
-    // Coordenadas originais
-    int xCentro = (int) x1;
-    int yCentro = (int) y1;
-    int xRaio   = (int) x2;
-    int yRaio   = (int) y2;
-
-    // Variaveis    
-    int d     = 1 - yRaio;
-    int incE  = 3;
-    int incSE = (-2 * yRaio) + 5;
-
-
-    // Algoritmo de Bresenham
-    int bresenhamX, bresenhamY;
-    int Yi = yRaio;
-
-    for (int Xi = 0; Yi > Xi; Xi++)
-    {
-        // Primeiro ponto e Ultimo ponto
-        if (Xi == 0 || Xi == Yi)
-        {
-            bresenhamX = Xi;
-            bresenhamY = Yi;
-        }
-
-        // Restante
-        else
-        {
-            bresenhamX = Xi;
-
-            if (d < 0)
-            {
-                d     += incE;      // Avanco pro Leste
-                incE  += 2;
-                incSE += 2;
-            }
-            else
-            {
-                d     += incSE;     // Avanco pro Sudeste
-                incE  += 2;
-                incSE += 4;
-                Yi--;
-            }
-
-            bresenhamY = Yi;
-        }
-
-
-        // Desenha os pontos (Translacao + Simetria dos Octantes)
-
-        // Coordenada a ser rasterizada eh (0, R)
-        vertice v;
-        if (Xi == 0)
-        {
-            v.x = xCentro + bresenhamX; v.y = yCentro + bresenhamY;
-            listaVertices.push_front(v);
-            v.x = xCentro + bresenhamX; v.y = yCentro - bresenhamY;
-            listaVertices.push_front(v);
-            v.x = xCentro + bresenhamY; v.y = yCentro + bresenhamX;
-            listaVertices.push_front(v);
-            v.x = xCentro - bresenhamY; v.y = yCentro - bresenhamX;
-            listaVertices.push_front(v);
-        }
-        else
-        {
-            v.x = xCentro + bresenhamX; v.y = yCentro + bresenhamY;
-            listaVertices.push_front(v);
-            v.x = xCentro + bresenhamY; v.y = yCentro + bresenhamX;
-            listaVertices.push_front(v);
-            v.x = xCentro + bresenhamY; v.y = yCentro - bresenhamX;
-            listaVertices.push_front(v);
-            v.x = xCentro + bresenhamX; v.y = yCentro - bresenhamY;
-            listaVertices.push_front(v);
-
-            v.x = xCentro - bresenhamX; v.y = yCentro - bresenhamY;
-            listaVertices.push_front(v);
-            v.x = xCentro - bresenhamY; v.y = yCentro - bresenhamX;
-            listaVertices.push_front(v);
-            v.x = xCentro - bresenhamY; v.y = yCentro + bresenhamX;
-            listaVertices.push_front(v);
-            v.x = xCentro - bresenhamX; v.y = yCentro + bresenhamY;
-            listaVertices.push_front(v);
-        }
-    }
-
-    return listaVertices;
-}
-
-
-
-
-
-
-
-
-forward_list<vertice> algoritmoFloodFill(int x1, int y1)
-{
-    // Lista de vertices a serem desenhados
-    forward_list<vertice> listaVertices;
-
-
-    // Guarda a cor do pixel clicado
-    int corPixelClick[4];
-    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
-
-    // Guarda a cor do pixel atual
-    int corPixelArea[4];
-
-
-    // Define a cor interna
-    glColor3f(rSelec, gSelec, bSelec);
-
-
-    // Para cada pixel acima do pixel clicado
-    int y2 = y1 + 1;
-    while (y2 <= height - 50)
-    {
-        int leftLimSup = x1, rightLimSup = x1;
-        glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            // Procura pelo limite esquerdo da linha
-            while (leftLimSup >= 0)
-            {
-                glReadPixels(leftLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    leftLimSup--;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Procura pelo limite direito da linha
-            while (rightLimSup <= width)
-            {
-                glReadPixels(rightLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    rightLimSup++;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Desenha a reta do pixel acima
-            vertice v;
-            for (int i = leftLimSup+1; i < rightLimSup; i++)
-            {
-                //drawPixel(i, y2);
-                v.x = i; v.y = y2;
-                listaVertices.push_front(v);
-            }
-
-            // Segue para o pixel de cima
-            y2++;
-            continue;
-        }
-
-        break;
-    }
-
-
-    
-    // Para o pixel clicado
-    int leftLimClick = x1, rightLimClick = x1;
-
-    // Procura pelo limite esquerdo da linha
-    while (leftLimClick >= 0)
-    {
-        glReadPixels(leftLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            leftLimClick--;
-            continue;
-        }
-
-        break;
-    }
-
-    // Procura pelo limite direito da linha
-    while (rightLimClick <= width)
-    {
-        glReadPixels(rightLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            rightLimClick++;
-            continue;
-        }
-
-        break;
-    }
-
-    // Desenha a linha do pixel clicado
-    for (int i = leftLimClick+1; i < rightLimClick; i++)
-    {
-        vertice v;
-        //drawPixel(i, y1);
-        v.x = i; v.y = y1;
-        listaVertices.push_front(v);
-    }
-
-    
-
-    // Para cada pixel abaixo do pixel clicado
-    int y0 = y1 - 1;
-    while (y0 >= 0)
-    {
-        int leftLimInf = x1, rightLimInf = x1;
-        glReadPixels(x1, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            // Procura pelo limite esquerdo da linha
-            while (leftLimInf >= 0)
-            {
-                glReadPixels(leftLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    leftLimInf--;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Procura pelo limite direito da linha
-            while (rightLimInf <= width)
-            {
-                glReadPixels(rightLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    rightLimInf++;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Desenha a reta do pixel abaixo
-            vertice v;
-            for (int i = leftLimInf+1; i < rightLimInf; i++)
-            {
-                //drawPixel(i, y0);
-                v.x = i; v.y = y0;
-                listaVertices.push_front(v);
-            }
-
-            // Segue para o pixel de baixo
-            y0--;
-            continue;
-        }
-
-        break;
-    }
-
-    return listaVertices;
-}
-
-
-
-
-
-bool confereCor(int corPixelArea[], int corPixelClick[])
-{
-    return (corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]);
-}
-
-
-
-void rasterizaPoligono(int coordsX[], int tamX, int coordsY[], int tamY)
-{
-    //
-}
-
-
-
-
-
-
-
