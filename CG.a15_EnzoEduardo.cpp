@@ -57,15 +57,27 @@ enum tipos_formas
 // Enumeracao com os tipos de transformacoes geometricas
 enum tipos_transformacoes
 {
-    TRAN = 10,
-    ESCA,
-    CISA,
-    REFL,
-    ROTA
+    TRAN = 10,  // Translacao
+    ESCA,       // Escala
+    CISA,       // Cisalhamento
+    REFL,       // Reflexao
+    ROTA        // Rotacao
 };
+
+// Indica a opcao de modo de claridade do editor
+bool nightMode = false;
 
 // Verifica se foi realizado o primeiro clique do mouse
 bool click1 = false;
+
+// Largura e altura da janela
+int width = 512, height = 512;
+
+// Indica o tipo de forma geometrica ativa para desenhar
+int modoForma = MOU, modoTransf = 0;
+
+// Contador de vertices
+int contCoordenadas = 0;
 
 // Coordenadas da posicao atual do mouse
 int m_x, m_y;
@@ -73,17 +85,8 @@ int m_x, m_y;
 // Coordenadas do primeiro clique e do segundo clique do mouse
 int mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2;
 
-// Largura e altura da janela (variaveis globais de todo o projeto)
-int width = 512, height = 512;
-
-// Indica o tipo de forma geometrica ativa para desenhar
-int modoForma = MOU, modoTransf = 0;
-
-// Contador de vertices?
-int contCoordenadas = 0;
-
 // Cor selecionada pro desenho
-float rSelec = 0.0, gSelec = 0.0, bSelec = 0.0;
+float rSelec, gSelec, bSelec;
 
 
 
@@ -105,10 +108,14 @@ forward_list<forma> formas;
 
 // Funcao para armazenar uma forma geometrica na lista de formas
 // Armazena sempre no inicio da lista
-void pushForma(int tipo, int tipoadd){
+void pushForma(int tipo, int tipoadd)
+{
     forma f;
     f.tipo = tipo;
     f.rCor = rSelec; f.gCor = gSelec; f.bCor = bSelec;
+
+    // Adiciona no inicio se for uma forma apenas com contorno
+    // Adiciona no final se for uma forma colorida pelo flood fill
     if (tipoadd == 0) {
         formas.push_front(f);
     } else {
@@ -120,10 +127,14 @@ void pushForma(int tipo, int tipoadd){
 
 // Funcao para armazenar um vertice na forma do inicio da lista de formas geometricas
 // Armazena sempre no inicio da lista
-void pushVertice(int x, int y, int tipoadd){
+void pushVertice(int x, int y, int tipoadd)
+{
     vertice v;
     v.x = x;
     v.y = y;
+
+    // Adiciona no topo se pertencer a uma forma apenas com contorno
+    // Adiciona no fim se pertencer a uma forma colorida pelo flood fill
     if (tipoadd == 0) {
         formas.front().v.push_front(v);
     } else {
@@ -144,8 +155,7 @@ void pushTransformacao(int tipo, float valores[2])
         tr.vtf[i] = valores[i];
     }
 
-    // Adiciona a transformacao em todas as formas desenhadas ate aquele momento (?)
-    // Testa se novas formas sao afetadas ou nao
+    // Adiciona a transformacao em todas as formas desenhadas ate aquele momento
     for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
     {
         f->t.push_front(tr);
@@ -166,7 +176,6 @@ void menu_popup(int value);
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void mousePassiveMotion(int x, int y);
-void drawPixel(int x, int y);
 
 // Funcao que trata da mudanca de estado de desenho
 void verificaCliqueBotao(int mouseX, int mouseY);
@@ -202,7 +211,7 @@ int main(int argc, char** argv){
 
     glutCreateMenu(menu_popup);
     glutAddMenuEntry("Linha", LIN);
-//    glutAddMenuEntry("Retangulo", RET);
+    glutAddMenuEntry("Retangulo", RET);
     glutAddMenuEntry("Sair", 0);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -218,8 +227,10 @@ int main(int argc, char** argv){
 /*
  * Inicializa alguns parametros do GLUT
  */
-void init(void){
-    glClearColor(1.0, 1.0, 1.0, 1.0); //Limpa a tela com a cor branca;
+void init(void)
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0);           // Limpa a tela com a cor branca
+    rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;   // Cor selecionada inicialmente preta
 }
 
 
@@ -240,15 +251,16 @@ void reshape(int w, int h)
 
     glOrtho (0, w, 0, h, -1 ,1);    // (0,0) no canto inferior da tela,
                                     // independente da resolucao
-    //glOrtho (-(w/2), (w/2), -(h/2), (h/2), -1 ,1);
 }
 
 
 /*
  * Controle das teclas comuns do teclado
  */
-void keyboard(unsigned char key, int x, int y){
-    switch (key) {
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
         case ESC: exit(EXIT_SUCCESS); break;
     }
 }
@@ -257,13 +269,14 @@ void keyboard(unsigned char key, int x, int y){
 /*
  * Controle dos botoes do mouse
  */
-void mouse(int button, int state, int x, int y){
-    switch (button) {
-
+void mouse(int button, int state, int x, int y)
+{
+    switch (button)
+    {
         case GLUT_LEFT_BUTTON:
 
-            switch(modoForma){
-
+            switch(modoForma)
+            {
                 case MOU:
                     // Clique
                     if (state == GLUT_UP)
@@ -772,7 +785,7 @@ void display(void)
 
 
     // Carrega a GUI do app
-    desenhaGUI();
+    desenhaGUI(nightMode);
 
     // Desenha as formas geometricas da lista
     drawFormas();
@@ -956,7 +969,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
 
-    // Tratamento das barras RGB
+    /* ====== Tratamento das barras RGB ====== */
         else if (mouseX >= width-90 && mouseX <= width-10)
         {
             // Barra de cor R
@@ -988,26 +1001,62 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
 
+    /* ====== Tratamento do modo de claridade ====== */
+        else if (mouseX >= 0 && mouseX <= 25)
+        {
+            if (mouseY >= height-25 && mouseY <= height-1)
+            {
+                // Alterna a variavel nightMode (muda cores de multiplos desenhos na GUI)
+                nightMode = !nightMode;
+
+                if (nightMode == false)
+                {
+                    // Colore as formas de cor branca para cor preta
+                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
+                    {
+                        if (f->rCor == 1.0 && f->gCor == 1.0 && f->bCor == 1.0)
+                        {
+                            f->rCor = 0.0; f->gCor = 0.0; f->bCor = 0.0;
+                        }
+                    }
+
+                    // Alterna a cor selecionada (se for branca)
+                    if (rSelec == 1.0 && gSelec == 1.0 && bSelec == 1.0)
+                    {
+                        rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;
+                    }
+
+                    // Limpa a tela com a cor branca
+                    glClearColor(1.0, 1.0, 1.0, 1.0);
+                }
+                else
+                {
+                    // Colore as formas de cor preta para cor branca
+                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
+                    {
+                        if (f->rCor == 0.0 && f->gCor == 0.0 && f->bCor == 0.0)
+                        {
+                            f->rCor = 1.0; f->gCor = 1.0; f->bCor = 1.0;
+                        }
+                    }
+
+                    // Alterna a cor selecionada (se for preta)
+                    if (rSelec == 0.0 && gSelec == 0.0 && bSelec == 0.0)
+                    {
+                        rSelec = 1.0; gSelec = 1.0; bSelec = 1.0;
+                    }
+
+                    // Limpa a tela com a cor preta
+                    glClearColor(0.0, 0.0, 0.0, 0.0);
+                }
+            }
+        }
+
     // Reinicia variaveis em caso de clique de forma
     if (clicouForma == true)
     {
         contCoordenadas = 0;
         modoTransf = 0;
-    }
-}
-
-
-/*
- * Funcao para desenhar apenas um pixel na tela
- */
-void drawPixel(int x, int y)
-{
-    // Restringe o desenho de pontos para a area de desenho
-    if (y <= height - 50)
-    {
-        glBegin(GL_POINTS); // Seleciona a primitiva GL_POINTS para desenhar
-            glVertex2i(x, y);
-        glEnd();  // indica o fim do ponto
     }
 }
 
@@ -1039,7 +1088,7 @@ void drawFormas()
                 {
                     forward_list<vertice> v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
                     for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                        drawPixel(it_v->x, it_v->y);
+                        drawPixel(it_v->x, it_v->y, 0);
                     }
                 }
             break;
@@ -1062,7 +1111,7 @@ void drawFormas()
                         }
 
                         for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y);
+                            drawPixel(it_v->x, it_v->y, 0);
                         }
                     }
                 }
@@ -1075,7 +1124,7 @@ void drawFormas()
                     {
                         v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
                         for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y);
+                            drawPixel(it_v->x, it_v->y, 0);
                         }
                     }
                     else if (contCoordenadas == 2)
@@ -1093,7 +1142,7 @@ void drawFormas()
                             }
 
                             for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                                drawPixel(it_v->x, it_v->y);
+                                drawPixel(it_v->x, it_v->y, 0);
                             }
                         }
                     }
@@ -1139,7 +1188,7 @@ void drawFormas()
                         }
 
                         for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y);
+                            drawPixel(it_v->x, it_v->y, 0);
                         }
                     }
                 }
@@ -1149,7 +1198,7 @@ void drawFormas()
                 {
                     forward_list<vertice> v = circuloBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
                     for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                        drawPixel(it_v->x, it_v->y);
+                        drawPixel(it_v->x, it_v->y, 0);
                     }
                 }
             break;
@@ -1188,7 +1237,7 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY);
+                        drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
             break;
@@ -1231,7 +1280,7 @@ void drawFormas()
                         {
                             float desenhoX = v->x;
                             float desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY);
+                            drawPixel(desenhoX, desenhoY, 0);
                         }
                     }
                 }
@@ -1277,7 +1326,7 @@ void drawFormas()
                             {
                                 float desenhoX = v->x;
                                 float desenhoY = v->y;
-                                drawPixel(desenhoX, desenhoY);
+                                drawPixel(desenhoX, desenhoY, 0);
                             }
                         }
                     }
@@ -1319,7 +1368,7 @@ void drawFormas()
                         {
                             float desenhoX = v->x;
                             float desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY);
+                            drawPixel(desenhoX, desenhoY, 0);
                         }
                     }
                 }
@@ -1352,7 +1401,7 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY);
+                        drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
             break;
@@ -1381,7 +1430,7 @@ void drawFormas()
                     {
                         float desenhoX = v->x;
                         float desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY);
+                        drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
             break;

@@ -10,6 +10,22 @@
 
 
 /*
+ * Funcao para desenhar apenas um pixel na tela
+ */
+void drawPixel(int x, int y, int modo)
+{
+    // Restringe o desenho de pontos para a area de desenho
+    // (modo 1 = permissao para desenhar na area da GUI, 0 = sem permissao)
+    if ((modo == 1) || (modo == 0 && y <= height - 50))
+    {
+        glBegin(GL_POINTS);     // Seleciona a primitiva GL_POINTS para desenhar
+            glVertex2i(x, y);
+        glEnd();                // Indica o fim do ponto
+    }
+}
+
+
+/*
  * Funcao que implementa o Algoritmo de Bresenham para rasterizacao de segmentos de retas
 */
 forward_list<vertice> retaBresenham(double x1, double y1, double x2, double y2)
