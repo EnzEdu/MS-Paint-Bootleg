@@ -423,14 +423,13 @@ forward_list<vertice> preenchePoligono(double x[], double y[], int tamanhoVetor)
 
 
 
-
     // Ordenacoes pra garantir a seguinte leitura 
     /*               
         (      ^
          \    /
           `__´
     */
-    // dos vertices das arestas
+    // dos vertices das arestas na TA
 
 
     // Ordena a TA com base nos yMin (InsertionSort)
@@ -684,188 +683,54 @@ forward_list<vertice> preenchePoligono(double x[], double y[], int tamanhoVetor)
 
 
 
-
-
-
-
-
-
-
-
-bool confereCor(int corPixelArea[], int corPixelClick[])
-{
-    return (corPixelArea[0] == corPixelClick[0] && corPixelArea[1] == corPixelClick[1] && corPixelArea[2] == corPixelClick[2]);
-}
-
-
-
-
 /*
  * Funcao que implementa o Algoritmo Flood Fill para preenchimento de poligonos
 */
-forward_list<vertice> algoritmoFloodFill(int x1, int y1)
+void algoritmoFloodFill(int x1, int y1, float *corAntiga, float *corNova, forward_list<vertice> *vertices)
 {
-    // Lista de vertices a serem desenhados
-    forward_list<vertice> listaVertices;
-
-
-    // Guarda a cor do pixel clicado
-    int corPixelClick[4];
-    glReadPixels(x1, y1, 1, 1, GL_RGB, GL_INT, corPixelClick);
-
-    // Guarda a cor do pixel atual
-    int corPixelArea[4];
-
-
-
-    // Para cada pixel acima do pixel clicado
-    int y2 = y1 + 1;
-    while (y2 <= height - 50)
+    // Verifica se este pixel ja foi analisado pelo algoritmo
+    bool jaAnalisado = false;
+    for (forward_list<vertice>::iterator it_v = vertices->begin(); it_v != vertices->end(); it_v++)
     {
-        int leftLimSup = x1, rightLimSup = x1;
-        glReadPixels(x1, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-        if (confereCor(corPixelArea, corPixelClick) == true)
+        if (it_v->x == x1 && it_v->y == y1)
         {
-            // Procura pelo limite esquerdo da linha
-            while (leftLimSup >= 0)
-            {
-                glReadPixels(leftLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+            jaAnalisado = true;
+            break;
+        }
+    }
 
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    leftLimSup--;
-                    continue;
-                }
 
-                break;
-            }
+    // Se nao tenha sido, faz a verificacao
+    if (jaAnalisado == false)
+    {
+        // Guarda a cor do pixel analisado
+        float corPixelAtual[3];
+        glReadPixels(x1, y1, 1, 1, GL_RGB, GL_FLOAT, corPixelAtual);
 
-            // Procura pelo limite direito da linha
-            while (rightLimSup <= width)
-            {
-                glReadPixels(rightLimSup, y2, 1, 1, GL_RGB, GL_INT, corPixelArea);
+        // Caso o pixel seja da cor antiga
+        if (corPixelAtual[0] == corAntiga[0] &&
+            corPixelAtual[1] == corAntiga[1] &&
+            corPixelAtual[2] == corAntiga[2])
+        {
+            // Pinta o pixel com a nova cor
+            glColor3f(corNova[0], corNova[1], corNova[2]);
+            drawPixel(x1, y1, 0);
 
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    rightLimSup++;
-                    continue;
-                }
 
-                break;
-            }
-
-            // Desenha a reta do pixel acima
+            // Salva o vertice na lista de vertices ja analisados
             vertice v;
-            for (int i = leftLimSup+1; i < rightLimSup; i++)
-            {
-                v.x = i; v.y = y2;
-                listaVertices.push_front(v);
-            }
+            v.x = x1;
+            v.y = y1;
+            vertices->push_front(v);
 
-            // Segue para o pixel de cima
-            y2++;
-            continue;
+
+            // Chamadas recursivas pros seus vizinhos cardeais (FloodFill com vizinhanca 4)
+            algoritmoFloodFill(x1+1, y1, corAntiga, corNova, vertices);
+            algoritmoFloodFill(x1, y1+1, corAntiga, corNova, vertices);
+            algoritmoFloodFill(x1-1, y1, corAntiga, corNova, vertices);
+            algoritmoFloodFill(x1, y1-1, corAntiga, corNova, vertices);
         }
-
-        break;
     }
-
-
-    
-    // Para o pixel clicado
-    int leftLimClick = x1, rightLimClick = x1;
-
-    // Procura pelo limite esquerdo da linha
-    while (leftLimClick >= 0)
-    {
-        glReadPixels(leftLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            leftLimClick--;
-            continue;
-        }
-
-        break;
-    }
-
-    // Procura pelo limite direito da linha
-    while (rightLimClick <= width)
-    {
-        glReadPixels(rightLimClick, y1, 1, 1, GL_RGB, GL_INT, corPixelArea);
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            rightLimClick++;
-            continue;
-        }
-
-        break;
-    }
-
-    // Desenha a linha do pixel clicado
-    for (int i = leftLimClick+1; i < rightLimClick; i++)
-    {
-        vertice v;
-        v.x = i; v.y = y1;
-        listaVertices.push_front(v);
-    }
-
-    
-
-    // Para cada pixel abaixo do pixel clicado
-    int y0 = y1 - 1;
-    while (y0 >= 0)
-    {
-        int leftLimInf = x1, rightLimInf = x1;
-        glReadPixels(x1, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-        if (confereCor(corPixelArea, corPixelClick) == true)
-        {
-            // Procura pelo limite esquerdo da linha
-            while (leftLimInf >= 0)
-            {
-                glReadPixels(leftLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    leftLimInf--;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Procura pelo limite direito da linha
-            while (rightLimInf <= width)
-            {
-                glReadPixels(rightLimInf, y0, 1, 1, GL_RGB, GL_INT, corPixelArea);
-
-                if (confereCor(corPixelArea, corPixelClick) == true)
-                {
-                    rightLimInf++;
-                    continue;
-                }
-
-                break;
-            }
-
-            // Desenha a reta do pixel abaixo
-            vertice v;
-            for (int i = leftLimInf+1; i < rightLimInf; i++)
-            {
-                v.x = i; v.y = y0;
-                listaVertices.push_front(v);
-            }
-
-            // Segue para o pixel de baixo
-            y0--;
-            continue;
-        }
-
-        break;
-    }
-
-    return listaVertices;
 }
 
 

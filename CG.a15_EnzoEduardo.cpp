@@ -1379,14 +1379,18 @@ void drawFormas()
                         aplicaTransformacao(&x, &y, tr);
                     }
 
+
+                    // Determina a cor do pixel clicado
+                    float corPixelAntiga[3];
+                    glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, corPixelAntiga);
+
+                    // Determina a cor nova
+                    float corPixelNova[] = {rSelec, gSelec, bSelec};
+
+
                     // Colore a area
-                    forward_list<vertice> vertices = algoritmoFloodFill(x, y);
-                    for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                    {
-                        double desenhoX = v->x;
-                        double desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY, 0);
-                    }
+                    forward_list<vertice> vertices;
+                    algoritmoFloodFill(x, y, corPixelAntiga, corPixelNova, &vertices);
                 }
             break;
             
