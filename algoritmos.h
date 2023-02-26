@@ -734,10 +734,4 @@ void algoritmoFloodFill(int x1, int y1, float *corAntiga, float *corNova, forwar
 }
 
 
-
-
-
-
-
-
 #endif

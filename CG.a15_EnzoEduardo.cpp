@@ -328,7 +328,7 @@ void mouse(int button, int state, int x, int y)
                                     if (mouseClick_y1 <= height - 50)
                                     {
                                         double vetorDeslocamento[2];
-                                        printf("Digite os valores de x e y: ");
+                                        printf("Digite os valores de translacao para x e y: ");
                                         scanf("%lf %lf", &vetorDeslocamento[0], &vetorDeslocamento[1]);
 
                                         pushTransformacao(TRAN, vetorDeslocamento);
@@ -346,7 +346,7 @@ void mouse(int button, int state, int x, int y)
                                     if (mouseClick_y1 <= height - 50)
                                     {
                                         double vetorDeslocamento[2];
-                                        printf("Digite os valores de x e y: ");
+                                        printf("Digite os valores de escala para x e y: ");
                                         scanf("%lf %lf", &vetorDeslocamento[0], &vetorDeslocamento[1]);
 
                                         pushTransformacao(ESCA, vetorDeslocamento);
@@ -364,7 +364,7 @@ void mouse(int button, int state, int x, int y)
                                     if (mouseClick_y1 <= height - 50)
                                     {
                                         char dados[2];
-                                        printf("Digite o eixo e o valor de deslocamento (ex: \"x 3\"): ");
+                                        printf("Digite o eixo e o valor de cisalhamento (ex: \"x 3\"): ");
                                         scanf(" %c %c", &dados[0], &dados[1]);
 
                                         double vetorDeslocamento[2];
@@ -386,7 +386,7 @@ void mouse(int button, int state, int x, int y)
                                     if (mouseClick_y1 <= height - 50)
                                     {
                                         char eixo;
-                                        printf("Digite o eixo (\"x\", \"y\" ou \"0\"): ");
+                                        printf("Digite o eixo de reflexao (\"x\", \"y\" ou \"0\"): ");
                                         scanf(" %c", &eixo);
 
                                         double vetorDeslocamento[2];
@@ -1811,6 +1811,18 @@ void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transf
         case REFL:
             {
                 reflexao(desenhoX, desenhoY, tr->vtf[0]);
+
+                switch ((char) tr->vtf[0])
+                {
+                    case 'x': translacao(desenhoX, desenhoY, 0, *desenhoY + (height - *desenhoY));
+                    break;
+
+                    case 'y': translacao(desenhoX, desenhoY, *desenhoX + (width - *desenhoX), 0);
+                    break;
+
+                    case '0': translacao(desenhoX, desenhoY, *desenhoX + (width - *desenhoX), *desenhoY + (height - *desenhoY));
+                    break;
+                }
             }
         break;
 
@@ -1825,3 +1837,4 @@ void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transf
         break;
     }
 }
+
