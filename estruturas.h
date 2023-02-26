@@ -1,8 +1,8 @@
 /*
  * Atividade 15 - Computacao Grafica
- * Codigo OpenGL responsavel pela definicao das estruturas do editor grafico
+ * Codigo OpenGL responsavel pela definicao das estruturas (structs) do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: ??/02/2023
+ * Data: 26/02/2023
 */
 
 #ifndef estruturas_h
@@ -23,7 +23,7 @@ struct vertice
 struct transformacao
 {
     int tipo;
-    float vtf[2];							// Vertices de transformacao final
+    double vtf[2];							// Vertices de transformacao final
 };
 
 

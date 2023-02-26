@@ -1,14 +1,18 @@
 /*
  * Atividade 15 - Computacao Grafica
- * Codigo OpenGL responsavel pela GUI do editor grafico
+ * Codigo OpenGL responsavel por conteudos extras do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: ??/02/2023
+ * Data: 26/02/2023
 */
 
 #ifndef extras_h
 #define extras_h
 
 
+/*
+ * Funcao responsavel pelo desenho dos vertices (gerados por algoritmos) no header extras.h
+ * (possui permissao de desenhar na area da GUI)
+*/
 void desenhaVertices(forward_list<vertice> v)
 {
     for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++)
@@ -20,6 +24,9 @@ void desenhaVertices(forward_list<vertice> v)
 
 
 
+/*
+ * Funcao responsavel pelo desenho da GUI da janela
+*/
 void desenhaGUI(bool nightMode)
 {
     forward_list<vertice> v;
@@ -139,7 +146,7 @@ void desenhaGUI(bool nightMode)
 
         // Quadrado com a cor escolhida para visualizacao
 
-            // Cor do caixote
+            // Cor do quadrado
             if (nightMode == false)
             {
                 glColor3f(0.0, 0.0, 0.0);   // (preto)
@@ -149,7 +156,7 @@ void desenhaGUI(bool nightMode)
                 glColor3f(1.0, 1.0, 1.0);   // (branco)
             }
 
-            // Desenha o caixote
+            // Desenha o quadrado
             for (int k = 0; k <= 27; k++)
             {
                 drawPixel(width-131+k, height-36  , 1);
@@ -158,7 +165,7 @@ void desenhaGUI(bool nightMode)
                 drawPixel(width-131  , height-36+k, 1);
             }
         
-            // Colore o caixote com a cor selecionada
+            // Colore o quadrado com a cor selecionada
             glColor3f(rSelec, gSelec, bSelec);
             for (int i = 0; i <= 25; i++)
             {
@@ -809,6 +816,402 @@ void desenhaGUI(bool nightMode)
         }
 
     glutPostRedisplay();
+}
+
+
+
+
+
+
+
+
+
+/*
+ * Funcao responsavel por todos os desenhos envolvendo textos no projeto
+*/
+void desenhaTextos()
+{
+    /* ====== Desenha o par de coordenadas na tela ====== */
+    if (m_y < height - 50)
+    {
+        if (nightMode == false)
+        {
+            glColor3f(0.0, 0.0, 0.0);
+        }
+        else
+        {
+            glColor3f(1.0, 1.0, 1.0);
+        }
+
+        draw_text_stroke(0, 3, "(" + to_string(m_x) + "," + to_string(m_y) + ")", 0.1);
+    }
+
+
+
+    /* ====== Mouse em um botao de forma ====== */
+    double mouse_x = m_x, mouse_y = m_y;
+
+        // Botao MOU
+        if (m_x > 70 && m_x < 90)
+        {
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != MOU)
+            {
+                double x[] = {mouse_x+8 , mouse_x+40, mouse_x+40, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Mouse", 0.08);
+            }
+        }
+
+        // Botao LIN
+        else if (m_x > 90 && m_x < 110)
+        {
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != LIN)
+            {
+                double x[] = {mouse_x+8 , mouse_x+35, mouse_x+35, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Linha", 0.08);
+            }
+        }
+
+        else if (m_x > 110 && m_x < 130)
+        {
+            // Botao RET
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != RET)
+            {
+                double x[] = {mouse_x+8 , mouse_x+56, mouse_x+56, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Retangulo", 0.08);
+            }
+
+            // Botao RETp
+            else if (m_y >= height-25 && m_y <= height-5 && modoForma != RETp)
+            {
+                double x[] = {mouse_x+8 , mouse_x+116, mouse_x+116, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27 , mouse_y-15 , mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Retangulo Preenchido", 0.08);
+            }
+        }
+
+        else if (m_x > 130 && m_x < 150)
+        {
+            // Botao TRI
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != TRI)
+            {
+                double x[] = {mouse_x+8 , mouse_x+53, mouse_x+53, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Triangulo", 0.08);
+            }
+
+            // Botao TRIp
+            else if (m_y >= height-25 && m_y <= height-5 && modoForma != TRIp)
+            {
+                double x[] = {mouse_x+8 , mouse_x+112, mouse_x+112, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27 , mouse_y-15 , mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Triangulo Preenchido", 0.08);
+            }
+        }
+
+        else if (m_x > 150 && m_x < 170)
+        {
+            // Botao POL
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != POL)
+            {
+                double x[] = {mouse_x+8 , mouse_x+50, mouse_x+50, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Poligono", 0.08);
+            }
+
+            // Botao POLp
+            else if (m_y >= height-25 && m_y <= height-5 && modoForma != POLp)
+            {
+                double x[] = {mouse_x+8 , mouse_x+110, mouse_x+110, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27 , mouse_y-15 , mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Poligono Preenchido", 0.08);
+            }
+        }
+
+        // Botao CIR
+        else if (m_x > 170 && m_x < 190)
+        {
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != CIR)
+            {
+                double x[] = {mouse_x+8 , mouse_x+78, mouse_x+78, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Circunferencia", 0.08);
+            }
+        }
+
+        // Botao BAL
+        else if (m_x > 190 && m_x < 210)
+        {
+            if (m_y >= height-45 && m_y <= height-25 && modoForma != BAL)
+            {
+                double x[] = {mouse_x+8 , mouse_x+35, mouse_x+35, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Balde", 0.08);
+            }
+        }
+
+
+
+
+    /* ====== Mouse em um botao de transformacao ====== */
+        else if (m_x > 250 && m_x < 265)
+        {
+            if (modoForma == MOU || modoForma > TRAN)
+            {
+                // Botao TRAN
+                if (m_y >= height-17 && m_y <= height-2 && modoTransf != TRAN)
+                {
+                    double x[] = {mouse_x+8 , mouse_x+60, mouse_x+60, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Translacao", 0.08);
+                }
+
+                // Botao ESCA
+                else if (m_y >= height-32 && m_y <= height-17 && modoTransf != ESCA)
+                {
+                    double x[] = {mouse_x+8 , mouse_x+40, mouse_x+40, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Escala", 0.08);
+                }
+
+                // Botao CISA
+                else if (m_y >= height-47 && m_y <= height-32 && modoTransf != CISA)
+                {
+                    double x[] = {mouse_x+8 , mouse_x+72, mouse_x+72, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Cisalhamento", 0.08);
+                }
+            }
+        }
+
+        else if (m_x > 270 && m_x < 285)
+        {
+            if (modoForma == MOU || modoForma > TRAN)
+            {
+                // Botao REFL
+                if (m_y >= height-17 && m_y <= height-2 && modoTransf != REFL)
+                {
+                    double x[] = {mouse_x+8 , mouse_x+48, mouse_x+48, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Reflexao", 0.08);
+                }
+
+                // Botao ROTA
+                else if (m_y >= height-32 && m_y <= height-17 && modoTransf != ROTA)
+                {
+                    double x[] = {mouse_x+8 , mouse_x+48, mouse_x+48, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Rotacao", 0.08);
+                }
+            }
+        }
+
+
+
+
+    /* ====== Mouse em uma barra RGB ====== */
+        else if (m_x >= width-90 && m_x <= width-10)
+        {
+            // Barra R
+            if (m_y > height-15 && m_y < height-5)
+            {
+                float corEscolhida[3];
+                glReadPixels(m_x, m_y, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+                
+                double x[] = {mouse_x+8 , mouse_x+32, mouse_x+32, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, to_string(corEscolhida[0]).substr(0,4), 0.08);
+            }
+
+            // Barra G
+            else if (m_y > height-30 && m_y < height-20)
+            {
+                float corEscolhida[3];
+                glReadPixels(m_x, m_y, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+                
+                double x[] = {mouse_x+8 , mouse_x+32, mouse_x+32, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, to_string(corEscolhida[1]).substr(0,4), 0.08);
+            }
+
+            // Barra B
+            else if (m_y > height-45 && m_y < height-35)
+            {
+                float corEscolhida[3];
+                glReadPixels(m_x, m_y, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+                
+                double x[] = {mouse_x+8 , mouse_x+32, mouse_x+32, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, to_string(corEscolhida[2]).substr(0,4), 0.08);
+            }
+        }
+
+
+
+
+    /* ====== Mouse no quadrado de cor ====== */
+        else if (m_y > height-36 && m_y < height-9)
+        {
+            if (m_x > width-131 && m_x < width-104)
+            {
+                double x[] = {mouse_x+8 , mouse_x+85, mouse_x+85, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "(" + to_string(rSelec).substr(0,4) + ","
+                                                             + to_string(gSelec).substr(0,4) + ","
+                                                             + to_string(bSelec).substr(0,4) + ")", 0.08);
+            }
+        }
+
+
+
+
+    /* ====== Mouse no botao de claridade ====== */
+        if (m_x >= 0 && m_x <= 25)
+        {
+            if (m_y >= height-25 && m_y <= height-1)
+            {
+                if (nightMode == false)
+                {                    
+                    double x[] = {mouse_x+8 , mouse_x+102, mouse_x+102, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27 , mouse_y-15 , mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Alternar pra Noite", 0.08);
+                }
+                else
+                {
+                    double x[] = {mouse_x+8 , mouse_x+94, mouse_x+94, mouse_x+8};
+                    double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                    glColor3f(1.0, 1.0, 0.0);
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    desenhaVertices(v);
+
+                    glColor3f(0.0, 0.0, 0.0);
+                    draw_text_stroke(mouse_x+10, mouse_y-25, "Alternar pra Dia", 0.08);
+                }
+            }
+        }
 }
 
 

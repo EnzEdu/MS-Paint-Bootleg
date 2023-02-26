@@ -2,49 +2,59 @@
  * Atividade 15 - Computacao Grafica
  * Codigo OpenGL responsavel pelas transformacoes geometricas do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: ??/02/2023
+ * Data: 26/02/2023
 */
 
 #ifndef transformacoes_h
 #define transformacoes_h
 
 
-void translacao(float *desenhoX, float *desenhoY, float Tx, float Ty)
+/*
+ * Funcao responsavel por calcular a transformacao de translacao de um determinado vertice
+*/
+void translacao(double *desenhoX, double *desenhoY, double Tx, double Ty)
 {
-    float matriz[] = {1 , 0 , 0,
-                      0 , 1 , 0,
-                      Tx, Ty, 1};
+    double matriz[] = {1 , 0 , 0,
+                       0 , 1 , 0,
+                       Tx, Ty, 1};
 
-    // Coordenadas da translacao
+    // Coordenadas
     *desenhoX = *desenhoX + matriz[6];
     *desenhoY = *desenhoY + matriz[7];
 }
 
 
-void escala(float *desenhoX, float *desenhoY, float Sx, float Sy)
+/*
+ * Funcao responsavel por calcular a transformacao de escala de um determinado vertice
+*/
+void escala(double *desenhoX, double *desenhoY, double Sx, double Sy)
 {
-    float matriz[] = {Sx, 0 , 0,
-                      0 , Sy, 0,
-                      0 , 0 , 1};
+    double matriz[] = {Sx, 0 , 0,
+                       0 , Sy, 0,
+                       0 , 0 , 1};
 
-    // Coordenadas da escala
+    // Coordenadas
     *desenhoX = (*desenhoX * matriz[0]);
     *desenhoY = (*desenhoY * matriz[4]);
 }
 
 
-void cisalhamento(float *desenhoX, float *desenhoY, float eixo, float valor)
+/*
+ * Funcao responsavel por calcular a transformacao de cisalhamento de um determinado vertice
+*/
+void cisalhamento(double *desenhoX, double *desenhoY, double eixo, double valor)
 {
     switch ((char) eixo)
     {
         case 'x':
             {
-                float c = valor - 48;
+                double c = valor - 48;
 
-                float matriz[] = {1, 0, 0,
-                                  c, 1, 0,
-                                  0, 0, 1};
+                double matriz[] = {1, 0, 0,
+                                   c, 1, 0,
+                                   0, 0, 1};
 
+                // Coordenadas
                 *desenhoX = *desenhoX + (*desenhoY * matriz[3]);
                 *desenhoY = *desenhoY;
             }
@@ -52,12 +62,13 @@ void cisalhamento(float *desenhoX, float *desenhoY, float eixo, float valor)
 
         case 'y':
             {
-                float c = valor - 48;
+                double c = valor - 48;
 
-                float matriz[] = {1, c, 0,
-                                  0, 1, 0,
-                                  0, 0, 1};
+                double matriz[] = {1, c, 0,
+                                   0, 1, 0,
+                                   0, 0, 1};
 
+                // Coordenadas
                 *desenhoX = *desenhoX;
                 *desenhoY = *desenhoY + (*desenhoX * matriz[1]);
             }
@@ -66,16 +77,20 @@ void cisalhamento(float *desenhoX, float *desenhoY, float eixo, float valor)
 }
 
 
-void reflexao(float *desenhoX, float *desenhoY, float eixo)
+/*
+ * Funcao responsavel por calcular a transformacao de reflexao de um determinado vertice
+*/
+void reflexao(double *desenhoX, double *desenhoY, double eixo)
 {
     switch ((char) eixo)
     {
         case 'x':
             {
-                float matriz[] = {1,  0, 0,
-                                  0, -1, 0,
-                                  0,  0, 1};
+                double matriz[] = {1,  0, 0,
+                                   0, -1, 0,
+                                   0,  0, 1};
 
+                // Coordenadas
                 *desenhoX  = *desenhoX;
                 *desenhoY *= matriz[4];
             }
@@ -83,10 +98,11 @@ void reflexao(float *desenhoX, float *desenhoY, float eixo)
 
         case 'y':
             {
-                float matriz[] = {-1, 0, 0,
-                                   0, 1, 0,
-                                   0, 0, 1};
+                double matriz[] = {-1, 0, 0,
+                                    0, 1, 0,
+                                    0, 0, 1};
 
+                // Coordenadas
                 *desenhoX *= matriz[0];
                 *desenhoY  = *desenhoY;
             }
@@ -94,10 +110,11 @@ void reflexao(float *desenhoX, float *desenhoY, float eixo)
 
         case '0':
             {
-                float matriz[] = {-1,  0, 0,
-                                   0, -1, 0,
-                                   0,  0, 1};
+                double matriz[] = {-1,  0, 0,
+                                    0, -1, 0,
+                                    0,  0, 1};
 
+                // Coordenadas
                 *desenhoX *= matriz[0];
                 *desenhoY *= matriz[4];
             }
@@ -106,15 +123,19 @@ void reflexao(float *desenhoX, float *desenhoY, float eixo)
 }
 
 
-void rotacao(float *desenhoX, float *desenhoY, float teta)
+/*
+ * Funcao responsavel por calcular a transformacao de rotacao de um determinado vertice
+*/
+void rotacao(double *desenhoX, double *desenhoY, double teta)
 {
     double matriz[] = { cos(teta), sin(teta), 0,
                        -sin(teta), cos(teta), 0,
                                 0,         0, 1};
 
-    float tempX = (*desenhoX * matriz[0]) + (*desenhoY * matriz[3]);
-    float tempY = (*desenhoX * matriz[1]) + (*desenhoY * matriz[4]);
+    double tempX = (*desenhoX * matriz[0]) + (*desenhoY * matriz[3]);
+    double tempY = (*desenhoX * matriz[1]) + (*desenhoY * matriz[4]);
 
+    // Coordenadas
     *desenhoX = tempX;
     *desenhoY = tempY;
 }

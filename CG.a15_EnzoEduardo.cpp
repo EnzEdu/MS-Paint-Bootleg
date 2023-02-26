@@ -2,7 +2,7 @@
  * Atividade 15 - Computacao Grafica
  * Editor Grafico feito com OpenGL/GLUT
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: ??/02/2023
+ * Data: 26/02/2023
 */
 
 
@@ -49,9 +49,9 @@ enum tipos_formas
     POL,        // Poligono
     CIR,        // Circulo
     BAL,        // Balde de tinta (Flood Fill)
-    RETc,       // Retangulo      (Rasterizado)
-    TRIc,       // Triangulo      (Rasterizado)
-    POLc        // Poligono       (Rasterizado)
+    RETp,       // Retangulo      (Preenchido)
+    TRIp,       // Triangulo      (Preenchido)
+    POLp        // Poligono       (Preenchido)
 };
 
 // Enumeracao com os tipos de transformacoes geometricas
@@ -96,8 +96,8 @@ float rSelec, gSelec, bSelec;
 #include "estruturas.h"
 #include "algoritmos.h"
 #include "transformacoes.h"
-#include "extras.h"
 #include "glut_text.h"
+#include "extras.h"
 
 
 
@@ -144,8 +144,8 @@ void pushVertice(int x, int y, int tipoadd)
     }
 }
 
-// Funcao para armazenar uma transformacao na forma
-void pushTransformacao(int tipo, float valores[2])
+// Funcao para armazenar uma transformacao em cada forma da lista
+void pushTransformacao(int tipo, double valores[2])
 {
     transformacao tr;
     tr.tipo = tipo;
@@ -184,7 +184,7 @@ void verificaCliqueBotao(int mouseX, int mouseY);
 void drawFormas();
 
 // Funcao que percorre a lista de transformacoes geometricas de cada forma, aplicando-as nas coordenadas
-void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transformacao>::iterator tr);
+void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transformacao>::iterator tr);
 
 
 
@@ -209,12 +209,6 @@ int main(int argc, char** argv){
     glutPassiveMotionFunc(mousePassiveMotion);      // Callback do movimento passivo do mouse
     glutDisplayFunc(display);                       // Callback de desenho
 
-    glutCreateMenu(menu_popup);
-    glutAddMenuEntry("Linha", LIN);
-    glutAddMenuEntry("Retangulo", RET);
-    glutAddMenuEntry("Sair", 0);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-
     glutMainLoop();                                 // Executa o loop do OpenGL
 
     return EXIT_SUCCESS;                            // Retorna 0 para o tipo inteiro da funcao main()
@@ -230,8 +224,43 @@ int main(int argc, char** argv){
 void init(void)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);           // Limpa a tela com a cor branca
-    rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;   // Cor selecionada inicialmente preta
+    rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;   // Cor selecionada pra desenho inicialmente preta
+
+    // Cria o menu reserva (outra opcao caso os botoes de desenho quebrem)
+    int menuFormas = glutCreateMenu(menu_popup);
+    glutAddMenuEntry("Linha"               , LIN);
+    glutAddMenuEntry("Retangulo"           , RET);
+    glutAddMenuEntry("Triangulo"           , TRI);
+    glutAddMenuEntry("Poligono"            , POL);
+    glutAddMenuEntry("Circunferencia"      , CIR);
+    glutAddMenuEntry("Balde de tinta"      , BAL);
+    glutAddMenuEntry("Retangulo preenchido", RETp);
+    glutAddMenuEntry("Triangulo preenchido", TRIp);
+    glutAddMenuEntry("Poligono preenchido" , POLp);
+
+    int menuTransf = glutCreateMenu(menu_popup);
+    glutAddMenuEntry("Translacao"          , TRAN);
+    glutAddMenuEntry("Escala"              , ESCA);
+    glutAddMenuEntry("Cisalhamento"        , CISA);
+    glutAddMenuEntry("Reflexao"            , REFL);
+    glutAddMenuEntry("Rotacao"             , ROTA);
+
+    glutCreateMenu(menu_popup);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutAddSubMenu("Formas"        , menuFormas);
+    glutAddSubMenu("Transformacoes", menuTransf);
+    glutAddMenuEntry("Sair", -1);
 }
+
+
+/*
+ * Controla o menu pop-up
+ */
+void menu_popup(int value){
+    if (value == -1) exit(EXIT_SUCCESS);
+    modoForma = value;
+}
+
 
 
 /*
@@ -278,6 +307,7 @@ void mouse(int button, int state, int x, int y)
             switch(modoForma)
             {
                 case MOU:
+
                     // Clique
                     if (state == GLUT_UP)
                     {
@@ -297,9 +327,9 @@ void mouse(int button, int state, int x, int y)
                                 {
                                     if (mouseClick_y1 <= height - 50)
                                     {
-                                        float vetorDeslocamento[2];
+                                        double vetorDeslocamento[2];
                                         printf("Digite os valores de x e y: ");
-                                        scanf("%f %f", &vetorDeslocamento[0], &vetorDeslocamento[1]);
+                                        scanf("%lf %lf", &vetorDeslocamento[0], &vetorDeslocamento[1]);
 
                                         pushTransformacao(TRAN, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
@@ -315,9 +345,9 @@ void mouse(int button, int state, int x, int y)
                                 {
                                     if (mouseClick_y1 <= height - 50)
                                     {
-                                        float vetorDeslocamento[2];
+                                        double vetorDeslocamento[2];
                                         printf("Digite os valores de x e y: ");
-                                        scanf("%f %f", &vetorDeslocamento[0], &vetorDeslocamento[1]);
+                                        scanf("%lf %lf", &vetorDeslocamento[0], &vetorDeslocamento[1]);
 
                                         pushTransformacao(ESCA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
@@ -337,9 +367,9 @@ void mouse(int button, int state, int x, int y)
                                         printf("Digite o eixo e o valor de deslocamento (ex: \"x 3\"): ");
                                         scanf(" %c %c", &dados[0], &dados[1]);
 
-                                        float vetorDeslocamento[2];
-                                        vetorDeslocamento[0] = (float) dados[0];
-                                        vetorDeslocamento[1] = (float) dados[1];
+                                        double vetorDeslocamento[2];
+                                        vetorDeslocamento[0] = (double) dados[0];
+                                        vetorDeslocamento[1] = (double) dados[1];
 
                                         pushTransformacao(CISA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
@@ -359,8 +389,8 @@ void mouse(int button, int state, int x, int y)
                                         printf("Digite o eixo (\"x\", \"y\" ou \"0\"): ");
                                         scanf(" %c", &eixo);
 
-                                        float vetorDeslocamento[2];
-                                        vetorDeslocamento[0] = (float) eixo;
+                                        double vetorDeslocamento[2];
+                                        vetorDeslocamento[0] = (double) eixo;
                                         vetorDeslocamento[1] = 0;
 
                                         pushTransformacao(REFL, vetorDeslocamento);
@@ -383,7 +413,7 @@ void mouse(int button, int state, int x, int y)
 
                                         // Converte graus em radianos
                                         // (funcoes trig da math.h trabalham com radianos)
-                                        float vetorDeslocamento[2];
+                                        double vetorDeslocamento[2];
                                         
                                         vetorDeslocamento[0] = grauRotacao * M_PI / 180.0;
                                         vetorDeslocamento[1] = 0;
@@ -398,11 +428,6 @@ void mouse(int button, int state, int x, int y)
                                 }
                             break;
                         }
-                    }
-                    // Segurou
-                    else
-                    {
-                        // Modo de selecionar
                     }
                 break;
 
@@ -675,87 +700,162 @@ void mouse(int button, int state, int x, int y)
                     }
                 break;
 
-                case RETc:
+                case RETp:
                     if (state == GLUT_UP)
                     {
-                        if (click1 == false)
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                click1 = false;
+                                contCoordenadas = 0;
+                                
+                                pushForma(modoForma, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                pushVertice(mouseClick_x2, mouseClick_y1, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(mouseClick_x2, mouseClick_y2);
+                            }
+
+                            printf("Clique 2(%d, %d)\n",mouseClick_x2,mouseClick_y2);
+                        }
+                        else
                         {
                             mouseClick_x1 = x;
                             mouseClick_y1 = height - y - 1;
 
                             if (mouseClick_y1 <= height - 50)
                             {
-                                //
+                                click1 = true;
+                                contCoordenadas++;
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
                             }
 
-                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
+                            printf("Clique 1(%d, %d)\n",mouseClick_x1,mouseClick_y1);
                         }
                     }
                 break;
 
-                case TRIc:
+                case TRIp:
                     if (state == GLUT_UP)
                     {
-                        if (click1 == false)
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                if (contCoordenadas == 1)
+                                {
+                                    click1 = true;
+                                    contCoordenadas++;
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                    printf("Clique 2(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                                }
+                                else
+                                {
+                                    click1 = false;
+                                    contCoordenadas = 0;
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                    printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+                                }
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(x, height - y - 1);
+                            }
+                        }
+                        else
                         {
                             mouseClick_x1 = x;
                             mouseClick_y1 = height - y - 1;
 
                             if (mouseClick_y1 <= height - 50)
                             {
-                                //
+                                click1 = true;
+                                contCoordenadas++;
+                                pushForma(modoForma, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
                             }
-
-                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
                     }
                 break;
 
-                case POLc:
+                case POLp:
                     if (state == GLUT_UP)
                     {
-                        if (click1 == false)
+                        if (click1 == true)
+                        {
+                            mouseClick_x2 = x;
+                            mouseClick_y2 = height - y - 1;
+
+                            if (mouseClick_y2 <= height - 50)
+                            {
+                                if (contCoordenadas > 3)
+                                {
+                                    if (mouseClick_x2 == mouseClick_x1 && mouseClick_y2 == mouseClick_y1)
+                                    {
+                                        click1 = false;
+                                        contCoordenadas = 0;
+                                    }
+                                    else
+                                    {
+                                        contCoordenadas++;
+                                        pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                        printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
+                                    }
+                                }
+                                else
+                                {
+                                    contCoordenadas++;
+                                    pushVertice(mouseClick_x2, mouseClick_y2, 0);
+                                    printf("Clique %d(%d, %d)\n", contCoordenadas, mouseClick_x2, mouseClick_y2);
+                                }
+                            }
+                            else
+                            {
+                                verificaCliqueBotao(x, height - y - 1);
+                            }
+                        }
+                        else
                         {
                             mouseClick_x1 = x;
                             mouseClick_y1 = height - y - 1;
 
                             if (mouseClick_y1 <= height - 50)
                             {
-                                //
+                                click1 = true;
+                                contCoordenadas++;
+                                pushForma(modoForma, 0);
+                                pushVertice(mouseClick_x1, mouseClick_y1, 0);
+                                printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                             }
                             else
                             {
                                 verificaCliqueBotao(mouseClick_x1, mouseClick_y1);
                             }
-
-                            printf("Clique 1(%d, %d)\n", mouseClick_x1, mouseClick_y1);
                         }
                     }
                 break;
             }
 
-        break;
-
-//        case GLUT_MIDDLE_BUTTON:
-//            if (state == GLUT_DOWN) {
-//                //glutPostRedisplay();
-//            }
-//        break;
-//
-//        case GLUT_RIGHT_BUTTON:
-//            if (state == GLUT_DOWN) {
-//                //glutPostRedisplay();
-//            }
-//        break;
-//    //glutPostRedisplay();        
+        break;      
     }
 }
 
@@ -787,282 +887,21 @@ void display(void)
     // Carrega a GUI do app
     desenhaGUI(nightMode);
 
+    // Desenha texto com as coordenadas da posicao do mouse
+    desenhaTextos();
+
     // Desenha as formas geometricas da lista
     drawFormas();
-
-
-    /*
-    //Desenha texto com as coordenadas da posicao do mouse
-    draw_text_stroke(0, 0, "(" + to_string(m_x) + "," + to_string(m_y) + ")", 0.2);
-    */
 
     // Troca os buffers
     glutSwapBuffers();
 }
 
 
-/*
- * Controla o menu pop-up
- */
-void menu_popup(int value){
-    if (value == 0) exit(EXIT_SUCCESS);
-    modoForma = value;
-}
-
-
-
-
-
-void verificaCliqueBotao(int mouseX, int mouseY)
-{
-    /* ====== Tratamento dos botoes de formas ====== */
-    bool clicouForma = false;
-
-        // Botao MOU
-        if (mouseX > 70 && mouseX < 90)
-        {
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != MOU)
-            {
-                printf("CLIQUE!!!!!\n");
-                modoForma = MOU;
-                clicouForma = true;
-            }
-        }
-
-        // Botao LIN
-        else if (mouseX > 90 && mouseX < 110)
-        {
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != LIN)
-            {
-                printf("LINHA!!!!!\n");
-                modoForma = LIN;
-                clicouForma = true;
-            }
-        }
-
-        else if (mouseX > 110 && mouseX < 130)
-        {
-            // Botao RET
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != RET)
-            {
-                printf("RETANGULO!!!!!\n");
-                modoForma = RET;
-                clicouForma = true;
-            }
-
-            // Botao RETc
-            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != RETc)
-            {
-                printf("RETANGULO_RASTERIZADO!!!!!\n");
-                modoForma = RETc;
-                clicouForma = true;
-            }
-        }
-
-        else if (mouseX > 130 && mouseX < 150)
-        {
-            // Botao TRI
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != TRI)
-            {
-                printf("TRIANGULO!!!!!\n");
-                modoForma = TRI;
-                clicouForma = true;
-            }
-
-            // Botao TRIc
-            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != TRIc)
-            {
-                printf("TRIANGULO_RASTERIZADO!!!!!\n");
-                modoForma = TRIc;
-                clicouForma = true;
-            }
-        }
-
-        else if (mouseX > 150 && mouseX < 170)
-        {
-            // Botao POL
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != POL)
-            {
-                printf("POLIGONO!!!!!\n");
-                modoForma = POL;
-                clicouForma = true;
-            }
-
-            // Botao POLc
-            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != POLc)
-            {
-                printf("POLIGONO_RASTERIZADO!!!!!\n");
-                modoForma = POLc;
-                clicouForma = true;
-            }
-        }
-
-        // Botao CIR
-        else if (mouseX > 170 && mouseX < 190)
-        {
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != CIR)
-            {
-                printf("CIRCULO!!!!!\n");
-                modoForma = CIR;
-                clicouForma = true;
-            }
-        }
-
-        // Botao BAL
-        else if (mouseX > 190 && mouseX < 210)
-        {
-            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != BAL)
-            {
-                printf("BALDE!!!!!\n");
-                modoForma = BAL;
-                clicouForma = true;
-            }
-        }
-
-
-    /* ====== Tratamento das colunas de transformacao ====== */
-        else if (mouseX > 250 && mouseX < 265)
-        {
-            if (modoForma == MOU)
-            {
-                // Botao de translacao
-                if (mouseY >= height-17 && mouseY <= height-2 && modoTransf != TRAN)
-                {
-                    printf("TRANSLACAO!!!!!\n");
-                    modoTransf = TRAN;
-                }
-
-                // Botao de escala
-                else if (mouseY >= height-32 && mouseY <= height-17 && modoTransf != ESCA)
-                {
-                    printf("ESCALA!!!!!\n");
-                    modoTransf = ESCA;
-                }
-
-                // Botao de cisalhamento
-                else if (mouseY >= height-47 && mouseY <= height-32 && modoTransf != CISA)
-                {
-                    printf("CISALHAMENTO!!!!!\n");
-                    modoTransf = CISA;
-                }
-            }
-        }
-
-        else if (mouseX > 270 && mouseX < 285)
-        {
-            if (modoForma == MOU)
-            {
-                // Botao de reflexao
-                if (mouseY >= height-17 && mouseY <= height-2 && modoTransf != REFL)
-                {
-                    printf("REFLEXAO!!!!!\n");
-                    modoTransf = REFL;
-                }
-
-                // Botao de rotacao
-                else if (mouseY >= height-32 && mouseY <= height-17 && modoTransf != ROTA)
-                {
-                    printf("ROTACAO!!!!!\n");
-                    modoTransf = ROTA;
-                }
-            }
-        }
-
-
-    /* ====== Tratamento das barras RGB ====== */
-        else if (mouseX >= width-90 && mouseX <= width-10)
-        {
-            // Barra de cor R
-            if (mouseY > height-15 && mouseY < height-5)
-            {
-                float corEscolhida[3];
-                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
-
-                rSelec = corEscolhida[0];
-            }
-
-            // Barra de cor G
-            else if (mouseY > height-30 && mouseY < height-20)
-            {
-                float corEscolhida[3];
-                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
-
-                gSelec = corEscolhida[1];
-            }
-
-            // Barra de cor B
-            else if (mouseY >= height-45 && mouseY <= height-35)
-            {
-                float corEscolhida[3];
-                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
-
-                bSelec = corEscolhida[2];
-            }
-        }
-
-
-    /* ====== Tratamento do modo de claridade ====== */
-        else if (mouseX >= 0 && mouseX <= 25)
-        {
-            if (mouseY >= height-25 && mouseY <= height-1)
-            {
-                // Alterna a variavel nightMode (muda cores de multiplos desenhos na GUI)
-                nightMode = !nightMode;
-
-                if (nightMode == false)
-                {
-                    // Colore as formas de cor branca para cor preta
-                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
-                    {
-                        if (f->rCor == 1.0 && f->gCor == 1.0 && f->bCor == 1.0)
-                        {
-                            f->rCor = 0.0; f->gCor = 0.0; f->bCor = 0.0;
-                        }
-                    }
-
-                    // Alterna a cor selecionada (se for branca)
-                    if (rSelec == 1.0 && gSelec == 1.0 && bSelec == 1.0)
-                    {
-                        rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;
-                    }
-
-                    // Limpa a tela com a cor branca
-                    glClearColor(1.0, 1.0, 1.0, 1.0);
-                }
-                else
-                {
-                    // Colore as formas de cor preta para cor branca
-                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
-                    {
-                        if (f->rCor == 0.0 && f->gCor == 0.0 && f->bCor == 0.0)
-                        {
-                            f->rCor = 1.0; f->gCor = 1.0; f->bCor = 1.0;
-                        }
-                    }
-
-                    // Alterna a cor selecionada (se for preta)
-                    if (rSelec == 0.0 && gSelec == 0.0 && bSelec == 0.0)
-                    {
-                        rSelec = 1.0; gSelec = 1.0; bSelec = 1.0;
-                    }
-
-                    // Limpa a tela com a cor preta
-                    glClearColor(0.0, 0.0, 0.0, 0.0);
-                }
-            }
-        }
-
-    // Reinicia variaveis em caso de clique de forma
-    if (clicouForma == true)
-    {
-        contCoordenadas = 0;
-        modoTransf = 0;
-    }
-}
 
 
 /*
- *Funcao que desenha a lista de formas geometricas
+ * Funcao que desenha a lista de formas geometricas
  */
 void drawFormas()
 {
@@ -1074,8 +913,15 @@ void drawFormas()
     }
     else
     {
-        // Desenho em progresso = cor vermelha
-        glColor3f(1.0, 0.0, 0.0);
+        // Desenho em progresso
+        if (rSelec > gSelec && rSelec > bSelec)
+        {
+            glColor3f(1.0, 0.0, 1.0);   // (roxo)
+        }
+        else
+        {
+            glColor3f(1.0, 0.0, 0.0);   // (vermelho)
+        }
     }
 
 
@@ -1157,7 +1003,7 @@ void drawFormas()
                     int numVertices = distance(f->v.begin(), f->v.end());
 
                     // Listas com os x e y de cada vertice da forma
-                    float x[numVertices], y[numVertices];
+                    double x[numVertices], y[numVertices];
 
                     // Salva todas as coordenadas
                     int i = 0;
@@ -1170,7 +1016,14 @@ void drawFormas()
                     // Muda a cor das linhas ao passar pelo vertice inicial
                     if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
                     {
-                        glColor3f(0.0, 0.0, 1.0);
+                        if (f->bCor > f->rCor && f->bCor > f-> gCor)
+                        {
+                            glColor3f(0.0, 1.0, 0.0);   // (verde)
+                        }
+                        else
+                        {
+                            glColor3f(0.0, 0.0, 1.0);   // (azul)
+                        }
                     }
 
                     // Preview do poligono atual
@@ -1202,6 +1055,108 @@ void drawFormas()
                     }
                 }
             break;
+
+            case RETp:
+                {
+                    double clique_x1 = mouseClick_x1, clique_y1 = mouseClick_y1;
+                    double mouse_x = m_x, mouse_y = m_y;
+
+                    double x[] = {clique_x1, clique_x1, mouse_x, mouse_x};
+                    double y[] = {clique_y1, mouse_y, mouse_y, clique_y1};
+
+                    forward_list<vertice> v = preenchePoligono(x, y, 4);
+                    for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
+                        drawPixel(it_v->x, it_v->y, 0);
+                    }
+                }
+            break;
+
+            case TRIp:
+                {
+                    forward_list<vertice> v;
+                    if (contCoordenadas == 1)
+                    {
+                        v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
+                            drawPixel(it_v->x, it_v->y, 0);
+                        }
+                    }
+                    else if (contCoordenadas == 2)
+                    {
+                        double clique_x1 = mouseClick_x1, clique_x2 = mouseClick_x2;
+                        double clique_y1 = mouseClick_y1, clique_y2 = mouseClick_y2;
+                        double mouse_x = m_x, mouse_y = m_y;
+
+                        double x[] = {clique_x1, clique_x2, mouse_x};
+                        double y[] = {clique_y1, clique_y2, mouse_y};
+
+                        forward_list<vertice> v = preenchePoligono(x, y, 3);
+                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
+                            drawPixel(it_v->x, it_v->y, 0);
+                        }
+                    }
+                }
+            break;
+
+            case POLp:
+                {
+                    forward_list<forma>::iterator f = formas.begin();
+
+                    // Conta o numero atual de vertices do poligono
+                    int numVertices = distance(f->v.begin(), f->v.end());
+
+                    // Listas com os x e y de cada vertice da forma
+                    double x[numVertices], y[numVertices];
+
+                    // Salva todas as coordenadas
+                    int i = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
+                    {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Muda a cor das linhas temporariamente ao passar pelo vertice inicial
+                    if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                    {
+                        glColor3f(0.0, 0.0, 1.0);
+                    }
+
+
+                    // Preview do poligono
+                    forward_list<vertice> v;
+                    if (contCoordenadas == 1)
+                    {
+                        // Uma reta caso haja apenas dois vertices
+                        v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
+                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
+                            drawPixel(it_v->x, it_v->y, 0);
+                        }
+                    }
+                    else
+                    {
+                        // Um poligono (contando a posicao do mouse)
+                        double xo[numVertices+1];
+                        xo[numVertices] = (double) m_x;
+                        for (int j = 0; j < numVertices; j++)
+                        {
+                            xo[j] = x[j];
+                        }
+
+                        double yo[numVertices+1];
+                        yo[numVertices] = (double) m_y;
+                        for (int j = 0; j < numVertices; j++)
+                        {
+                            yo[j] = y[j];
+                        }
+
+                        v = preenchePoligono(xo, yo, numVertices+1);
+                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
+                            drawPixel(it_v->x, it_v->y, 0);
+                        }
+                    }
+                }
+            break;
         }
     }
 
@@ -1214,7 +1169,7 @@ void drawFormas()
             case LIN:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    float x[2], y[2];
+                    double x[2], y[2];
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1235,8 +1190,8 @@ void drawFormas()
                     forward_list<vertice> vertices = retaBresenham(x[0], y[0], x[1], y[1]);
                     for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                     {
-                        float desenhoX = v->x;
-                        float desenhoY = v->y;
+                        double desenhoX = v->x;
+                        double desenhoY = v->y;
                         drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
@@ -1245,7 +1200,7 @@ void drawFormas()
             case RET:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    float x[4], y[4];
+                    double x[4], y[4];
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1278,8 +1233,8 @@ void drawFormas()
 
                         for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                         {
-                            float desenhoX = v->x;
-                            float desenhoY = v->y;
+                            double desenhoX = v->x;
+                            double desenhoY = v->y;
                             drawPixel(desenhoX, desenhoY, 0);
                         }
                     }
@@ -1289,7 +1244,7 @@ void drawFormas()
             case TRI:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    float x[3], y[3];
+                    double x[3], y[3];
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1324,8 +1279,8 @@ void drawFormas()
 
                             for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                             {
-                                float desenhoX = v->x;
-                                float desenhoY = v->y;
+                                double desenhoX = v->x;
+                                double desenhoY = v->y;
                                 drawPixel(desenhoX, desenhoY, 0);
                             }
                         }
@@ -1339,7 +1294,7 @@ void drawFormas()
                     int numVertices = distance(f->v.begin(), f->v.end());
 
                     // Listas com os x e y de cada vertice da forma
-                    float x[numVertices], y[numVertices];
+                    double x[numVertices], y[numVertices];
                     
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1366,8 +1321,8 @@ void drawFormas()
 
                         for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                         {
-                            float desenhoX = v->x;
-                            float desenhoY = v->y;
+                            double desenhoX = v->x;
+                            double desenhoY = v->y;
                             drawPixel(desenhoX, desenhoY, 0);
                         }
                     }
@@ -1378,7 +1333,7 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     int i = 0;
-                    float x[2], y[2];
+                    double x[2], y[2];
 
                     // Salva as coordenadas de cada vertice da forma
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
@@ -1399,8 +1354,8 @@ void drawFormas()
                     forward_list<vertice> vertices = circuloBresenham(x[1], y[1], x[0], y[0]);
                     for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                     {
-                        float desenhoX = v->x;
-                        float desenhoY = v->y;
+                        double desenhoX = v->x;
+                        double desenhoY = v->y;
                         drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
@@ -1409,7 +1364,7 @@ void drawFormas()
             case BAL:
                 {
                     // Coordenadas x e y do clique inicial
-                    float x, y;
+                    double x, y;
 
                     // Salva as coordenadas do vertice do pixel clicado
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++){
@@ -1428,20 +1383,20 @@ void drawFormas()
                     forward_list<vertice> vertices = algoritmoFloodFill(x, y);
                     for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
                     {
-                        float desenhoX = v->x;
-                        float desenhoY = v->y;
+                        double desenhoX = v->x;
+                        double desenhoY = v->y;
                         drawPixel(desenhoX, desenhoY, 0);
                     }
                 }
             break;
-            /*
-            case RETc:
+            
+            case RETp:
                 {
                     // Listas com os x e y de cada vertice da forma
-                    int i = 0
-                    float x[4], y[4];
+                    double x[4], y[4];
 
                     // Salva as coordenadas de cada vertice
+                    int i = 0;
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
@@ -1456,11 +1411,115 @@ void drawFormas()
                         }
                     }
 
-                    // Desenha o retangulo
-                    //
+                    // Desenha o retangulo rasterizado
+                    forward_list<vertice> vertices = preenchePoligono(x, y, 4);
+                    for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
+                    {
+                        double desenhoX = v->x;
+                        double desenhoY = v->y;
+                        drawPixel(desenhoX, desenhoY, 0);
+                    }
                 }
             break;
-            */
+
+            case TRIp:
+                {
+                    // Listas com os x e y de cada vertice da forma
+                    double x[3], y[3];
+
+                    // Salva as coordenadas de cada vertice
+                    int i = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++) {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
+                    }
+
+                    // Desenha o triangulo
+                    if (i == 3)
+                    {
+                        forward_list<vertice> vertices = preenchePoligono(x, y, 3);
+                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
+                        {
+                            double desenhoX = v->x;
+                            double desenhoY = v->y;
+                            drawPixel(desenhoX, desenhoY, 0);
+                        }
+                    }
+                }
+            break;
+            
+            case POLp:
+                {
+                    // Conta o numero atual de vertices do poligono
+                    int numVertices = distance(f->v.begin(), f->v.end());
+
+                    // Listas com os x e y de cada vertice da forma
+                    double x[numVertices], y[numVertices];
+                    
+                    // Salva as coordenadas de cada vertice
+                    int i = 0;
+                    for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
+                    {
+                        x[i] = v->x;
+                        y[i] = v->y;
+                    }
+
+                    // Aplica as transformacoes armazenadas na forma
+                    for (int k = 0; k < numVertices; k++)
+                    {
+                        for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
+                        {
+                            aplicaTransformacao(&x[k], &y[k], tr);
+                        }
+                    }
+
+                    // Desenha o poligono
+                    forward_list<vertice> vertices;
+                    if (numVertices == 2)
+                    {
+                        vertices = retaBresenham(x[0], y[0], x[1], y[1]);
+                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
+                        {
+                            double desenhoX = v->x;
+                            double desenhoY = v->y;
+                            drawPixel(desenhoX, desenhoY, 0);
+                        }
+                    }
+                    else if (numVertices > 2)
+                    {
+                        // Muda a cor do poligono temporariamente ao passar pelo vertice inicial
+                        if (numVertices >= 5 && m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                        {
+                            if (f->bCor > f->rCor && f->bCor > f-> gCor)
+                            {
+                                glColor3f(0.0, 1.0, 0.0);   // (verde)
+                            }
+                            else
+                            {
+                                glColor3f(0.0, 0.0, 1.0);   // (azul)
+                            }
+                        }
+
+                        vertices = preenchePoligono(x, y, numVertices);
+                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
+                        {
+                            double desenhoX = v->x;
+                            double desenhoY = v->y;
+                            drawPixel(desenhoX, desenhoY, 0);
+                        }
+                    }
+                }
+            break;
+
             default:
             break;
         }
@@ -1468,7 +1527,261 @@ void drawFormas()
 }
 
 
-void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transformacao>::iterator tr)
+/*
+ * Funcao responsavel por tratar interacoes do mouse com os botoes da GUI
+ */
+void verificaCliqueBotao(int mouseX, int mouseY)
+{
+    /* ====== Clique em um botao de forma ====== */
+    bool clicouForma = false;
+
+        // Botao MOU
+        if (mouseX > 70 && mouseX < 90)
+        {
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != MOU)
+            {
+                printf("CLIQUE!!!!!\n");
+                modoForma = MOU;
+                clicouForma = true;
+            }
+        }
+
+        // Botao LIN
+        else if (mouseX > 90 && mouseX < 110)
+        {
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != LIN)
+            {
+                printf("LINHA!!!!!\n");
+                modoForma = LIN;
+                clicouForma = true;
+            }
+        }
+
+        else if (mouseX > 110 && mouseX < 130)
+        {
+            // Botao RET
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != RET)
+            {
+                printf("RETANGULO!!!!!\n");
+                modoForma = RET;
+                clicouForma = true;
+            }
+
+            // Botao RETp
+            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != RETp)
+            {
+                printf("RETANGULO_RASTERIZADO!!!!!\n");
+                modoForma = RETp;
+                clicouForma = true;
+            }
+        }
+
+        else if (mouseX > 130 && mouseX < 150)
+        {
+            // Botao TRI
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != TRI)
+            {
+                printf("TRIANGULO!!!!!\n");
+                modoForma = TRI;
+                clicouForma = true;
+            }
+
+            // Botao TRIp
+            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != TRIp)
+            {
+                printf("TRIANGULO_RASTERIZADO!!!!!\n");
+                modoForma = TRIp;
+                clicouForma = true;
+            }
+        }
+
+        else if (mouseX > 150 && mouseX < 170)
+        {
+            // Botao POL
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != POL)
+            {
+                printf("POLIGONO!!!!!\n");
+                modoForma = POL;
+                clicouForma = true;
+            }
+
+            // Botao POLp
+            else if (mouseY >= height-25 && mouseY <= height-5 && modoForma != POLp)
+            {
+                printf("POLIGONO_RASTERIZADO!!!!!\n");
+                modoForma = POLp;
+                clicouForma = true;
+            }
+        }
+
+        // Botao CIR
+        else if (mouseX > 170 && mouseX < 190)
+        {
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != CIR)
+            {
+                printf("CIRCULO!!!!!\n");
+                modoForma = CIR;
+                clicouForma = true;
+            }
+        }
+
+        // Botao BAL
+        else if (mouseX > 190 && mouseX < 210)
+        {
+            if (mouseY >= height-45 && mouseY <= height-25 && modoForma != BAL)
+            {
+                printf("BALDE!!!!!\n");
+                modoForma = BAL;
+                clicouForma = true;
+            }
+        }
+
+
+    /* ====== Clique em um botao de transformacao ====== */
+        else if (mouseX > 250 && mouseX < 265)
+        {
+            if (modoForma == MOU)
+            {
+                // Botao de translacao
+                if (mouseY >= height-17 && mouseY <= height-2 && modoTransf != TRAN)
+                {
+                    printf("TRANSLACAO!!!!!\n");
+                    modoTransf = TRAN;
+                }
+
+                // Botao de escala
+                else if (mouseY >= height-32 && mouseY <= height-17 && modoTransf != ESCA)
+                {
+                    printf("ESCALA!!!!!\n");
+                    modoTransf = ESCA;
+                }
+
+                // Botao de cisalhamento
+                else if (mouseY >= height-47 && mouseY <= height-32 && modoTransf != CISA)
+                {
+                    printf("CISALHAMENTO!!!!!\n");
+                    modoTransf = CISA;
+                }
+            }
+        }
+
+        else if (mouseX > 270 && mouseX < 285)
+        {
+            if (modoForma == MOU)
+            {
+                // Botao de reflexao
+                if (mouseY >= height-17 && mouseY <= height-2 && modoTransf != REFL)
+                {
+                    printf("REFLEXAO!!!!!\n");
+                    modoTransf = REFL;
+                }
+
+                // Botao de rotacao
+                else if (mouseY >= height-32 && mouseY <= height-17 && modoTransf != ROTA)
+                {
+                    printf("ROTACAO!!!!!\n");
+                    modoTransf = ROTA;
+                }
+            }
+        }
+
+
+    /* ====== Clique em uma das barras RGB ====== */
+        else if (mouseX >= width-90 && mouseX <= width-10)
+        {
+            // Barra de cor R
+            if (mouseY > height-15 && mouseY < height-5)
+            {
+                float corEscolhida[3];
+                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+                rSelec = corEscolhida[0];
+            }
+
+            // Barra de cor G
+            else if (mouseY > height-30 && mouseY < height-20)
+            {
+                float corEscolhida[3];
+                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+                gSelec = corEscolhida[1];
+            }
+
+            // Barra de cor B
+            else if (mouseY >= height-45 && mouseY <= height-35)
+            {
+                float corEscolhida[3];
+                glReadPixels(mouseX, mouseY, 1, 1, GL_RGB, GL_FLOAT, corEscolhida);
+
+                bSelec = corEscolhida[2];
+            }
+        }
+
+
+    /* ====== Clique no botao de claridade ====== */
+        else if (mouseX >= 0 && mouseX <= 25)
+        {
+            if (mouseY >= height-25 && mouseY <= height-1)
+            {
+                // Alterna a variavel nightMode (muda cores de multiplos desenhos na GUI)
+                nightMode = !nightMode;
+
+                if (nightMode == false)
+                {
+                    // Colore as formas de cor branca para cor preta
+                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
+                    {
+                        if (f->rCor == 1.0 && f->gCor == 1.0 && f->bCor == 1.0)
+                        {
+                            f->rCor = 0.0; f->gCor = 0.0; f->bCor = 0.0;
+                        }
+                    }
+
+                    // Alterna a cor selecionada (se for branca)
+                    if (rSelec == 1.0 && gSelec == 1.0 && bSelec == 1.0)
+                    {
+                        rSelec = 0.0; gSelec = 0.0; bSelec = 0.0;
+                    }
+
+                    // Limpa a tela com a cor branca
+                    glClearColor(1.0, 1.0, 1.0, 1.0);
+                }
+                else
+                {
+                    // Colore as formas de cor preta para cor branca
+                    for (forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++)
+                    {
+                        if (f->rCor == 0.0 && f->gCor == 0.0 && f->bCor == 0.0)
+                        {
+                            f->rCor = 1.0; f->gCor = 1.0; f->bCor = 1.0;
+                        }
+                    }
+
+                    // Alterna a cor selecionada (se for preta)
+                    if (rSelec == 0.0 && gSelec == 0.0 && bSelec == 0.0)
+                    {
+                        rSelec = 1.0; gSelec = 1.0; bSelec = 1.0;
+                    }
+
+                    // Limpa a tela com a cor preta
+                    glClearColor(0.0, 0.0, 0.0, 0.0);
+                }
+            }
+        }
+
+    // Reinicia variaveis em caso de clique de forma
+    if (clicouForma == true)
+    {
+        contCoordenadas = 0;
+        modoTransf = 0;
+    }
+}
+
+
+/*
+ * Funcao responsavel por aplicar as transformacoes da forma em cada vertice da mesma
+ */
+void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transformacao>::iterator tr)
 {
     // Aplica a transformacao geometrica com base no tipo
     switch (tr->tipo)
@@ -1499,7 +1812,7 @@ void aplicaTransformacao(float *desenhoX, float *desenhoY, forward_list<transfor
 
         case ROTA:
             {
-                float centroideX = width/2, centroideY = height/2;
+                double centroideX = width/2, centroideY = height/2;
 
                 translacao(desenhoX, desenhoY, -centroideX, -centroideY);
                 rotacao(desenhoX, desenhoY, tr->vtf[0]);
