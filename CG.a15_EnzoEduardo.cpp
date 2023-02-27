@@ -95,6 +95,7 @@ float rSelec, gSelec, bSelec;
 // Headers do arquivo
 #include "estruturas.h"
 #include "algoritmos.h"
+#include "formas.h"
 #include "transformacoes.h"
 #include "glut_text.h"
 #include "extras.h"
@@ -114,8 +115,8 @@ void pushForma(int tipo, int tipoadd)
     f.tipo = tipo;
     f.rCor = rSelec; f.gCor = gSelec; f.bCor = bSelec;
 
-    // Adiciona no inicio se for uma forma apenas com contorno
-    // Adiciona no final se for uma forma colorida pelo flood fill
+    // Adiciona no inicio da lista se for uma forma
+    // Adiciona no final se for um desenho pelo flood fill
     if (tipoadd == 0) {
         formas.push_front(f);
     } else {
@@ -133,8 +134,8 @@ void pushVertice(int x, int y, int tipoadd)
     v.x = x;
     v.y = y;
 
-    // Adiciona no topo se pertencer a uma forma apenas com contorno
-    // Adiciona no fim se pertencer a uma forma colorida pelo flood fill
+    // Adiciona na forma no topo se pertencer a uma forma apenas com contorno
+    // Adiciona no fim se pertencer a um desenho pelo flood fill
     if (tipoadd == 0) {
         formas.front().v.push_front(v);
     } else {
@@ -893,6 +894,7 @@ void display(void)
     // Desenha as formas geometricas da lista
     drawFormas();
 
+
     // Troca os buffers
     glutSwapBuffers();
 }
@@ -932,65 +934,40 @@ void drawFormas()
         {
             case LIN:
                 {
-                    forward_list<vertice> v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                    for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                        drawPixel(it_v->x, it_v->y, 0);
-                    }
+                    double x[] = {(double) mouseClick_x1, (double) m_x};
+                    double y[] = {(double) mouseClick_y1, (double) m_y};
+                    
+                    // Desenha a preview da linha
+                    desenhaLinha(x, y);
                 }
             break;
 
             case RET:
                 {
-                    forward_list<vertice> v;
-                    for (int k = 0; k < 4; k++)
-                    {
-                        switch (k)
-                        {
-                            case 0: v = retaBresenham(mouseClick_x1, mouseClick_y1, mouseClick_x1, m_y);
-                            break;
-                            case 1: v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, mouseClick_y1);
-                            break;
-                            case 2: v = retaBresenham(mouseClick_x1, m_y, m_x, m_y);
-                            break;
-                            case 3: v = retaBresenham(m_x, mouseClick_y1, m_x, m_y);
-                            break;
-                        }
-
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
-                    }
+                    double x[] = {(double) mouseClick_x1, (double) mouseClick_x1, (double) m_x, (double) m_x};
+                    double y[] = {(double) mouseClick_y1, (double) m_y, (double) m_y, (double) mouseClick_y1};
+                    
+                    // Desenha a preview do retangulo
+                    desenhaRetangulo(x, y);
                 }
             break;
 
             case TRI:
                 {
-                    forward_list<vertice> v;
                     if (contCoordenadas == 1)
                     {
-                        v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
+                        double x[] = {(double) mouseClick_x1, (double) m_x};
+                        double y[] = {(double) mouseClick_y1, (double) m_y};
+                        
+                        desenhaLinha(x, y);
                     }
                     else if (contCoordenadas == 2)
                     {
-                        for (int k = 0; k < 3; k++)
-                        {
-                            switch (k)
-                            {
-                                case 0: v = retaBresenham(mouseClick_x1, mouseClick_y1, mouseClick_x2, mouseClick_y2);
-                                break;
-                                case 1: v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                                break;
-                                case 2: v = retaBresenham(m_x, m_y, mouseClick_x2, mouseClick_y2);
-                                break;
-                            }
+                        double x[] = {(double) mouseClick_x1, (double) mouseClick_x2, (double) m_x};
+                        double y[] = {(double) mouseClick_y1, (double) mouseClick_y2, (double) m_y};
 
-                            for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                                drawPixel(it_v->x, it_v->y, 0);
-                            }
-                        }
+                        // Desenha a preview do triangulo
+                        desenhaTriangulo(x, y);
                     }
                 }
             break;
@@ -1003,10 +980,12 @@ void drawFormas()
                     int numVertices = distance(f->v.begin(), f->v.end());
 
                     // Listas com os x e y de cada vertice da forma
-                    double x[numVertices], y[numVertices];
+                    double x[numVertices+1], y[numVertices+1];
+                    x[0] = (double) m_x;
+                    y[0] = (double) m_y;
 
                     // Salva todas as coordenadas
-                    int i = 0;
+                    int i = 1;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
@@ -1014,7 +993,7 @@ void drawFormas()
                     }
 
                     // Muda a cor das linhas ao passar pelo vertice inicial
-                    if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                    if (m_x == x[numVertices] && m_y == y[numVertices])
                     {
                         if (f->bCor > f->rCor && f->bCor > f-> gCor)
                         {
@@ -1026,74 +1005,47 @@ void drawFormas()
                         }
                     }
 
-                    // Preview do poligono atual
-                    forward_list<vertice> v;
-                    for (int j = 0; j < numVertices; j++)
-                    {
-                        if (j != numVertices-1)
-                        {
-                            v = retaBresenham(x[j], y[j], x[j+1], y[j+1]);
-                        }
-                        
-                        if (j == 0)
-                        {
-                            v = retaBresenham(x[j], y[j], m_x, m_y);
-                        }
-
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
-                    }
+                    // Desenha a preview do poligono
+                    desenhaPoligono(x, y, numVertices+1);
                 }
             break;
 
             case CIR:
                 {
-                    forward_list<vertice> v = circuloBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                    for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                        drawPixel(it_v->x, it_v->y, 0);
-                    }
+                    double x[] = {(double) m_x, (double) mouseClick_x1};
+                    double y[] = {(double) m_y, (double) mouseClick_y1};
+
+                    // Desenha a preview da circunferencia
+                    desenhaCircunferencia(x, y);
                 }
             break;
 
             case RETp:
                 {
-                    double clique_x1 = mouseClick_x1, clique_y1 = mouseClick_y1;
-                    double mouse_x = m_x, mouse_y = m_y;
-
-                    double x[] = {clique_x1, clique_x1, mouse_x, mouse_x};
-                    double y[] = {clique_y1, mouse_y, mouse_y, clique_y1};
-
-                    forward_list<vertice> v = preenchePoligono(x, y, 4);
-                    for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                        drawPixel(it_v->x, it_v->y, 0);
-                    }
+                    double x[] = {(double) mouseClick_x1, (double) mouseClick_x1, (double) m_x, (double) m_x};
+                    double y[] = {(double) mouseClick_y1, (double) m_y, (double) m_y, (double) mouseClick_y1};
+                    
+                    // Desenha a preview do retangulo preenchido
+                    desenhaRetanguloPreenchido(x, y);
                 }
             break;
 
             case TRIp:
                 {
-                    forward_list<vertice> v;
                     if (contCoordenadas == 1)
                     {
-                        v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
+                        double x[] = {(double) mouseClick_x1, (double) m_x};
+                        double y[] = {(double) mouseClick_y1, (double) m_y};
+                        
+                        desenhaLinha(x, y);
                     }
                     else if (contCoordenadas == 2)
                     {
-                        double clique_x1 = mouseClick_x1, clique_x2 = mouseClick_x2;
-                        double clique_y1 = mouseClick_y1, clique_y2 = mouseClick_y2;
-                        double mouse_x = m_x, mouse_y = m_y;
+                        double x[] = {(double) mouseClick_x1, (double) mouseClick_x2, (double) m_x};
+                        double y[] = {(double) mouseClick_y1, (double) mouseClick_y2, (double) m_y};
 
-                        double x[] = {clique_x1, clique_x2, mouse_x};
-                        double y[] = {clique_y1, clique_y2, mouse_y};
-
-                        forward_list<vertice> v = preenchePoligono(x, y, 3);
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
+                        // Desenha a preview do triangulo preenchido
+                        desenhaTrianguloPreenchido(x, y);
                     }
                 }
             break;
@@ -1106,54 +1058,39 @@ void drawFormas()
                     int numVertices = distance(f->v.begin(), f->v.end());
 
                     // Listas com os x e y de cada vertice da forma
-                    double x[numVertices], y[numVertices];
+                    double x[numVertices+1], y[numVertices+1];
+                    x[0] = (double) m_x;
+                    y[0] = (double) m_y;
 
                     // Salva todas as coordenadas
-                    int i = 0;
+                    int i = 1;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
                     }
 
-                    // Muda a cor das linhas temporariamente ao passar pelo vertice inicial
-                    if (m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                    // Muda a cor das linhas ao passar pelo vertice inicial
+                    if (m_x == x[numVertices] && m_y == y[numVertices])
                     {
-                        glColor3f(0.0, 0.0, 1.0);
+                        if (f->bCor > f->rCor && f->bCor > f-> gCor)
+                        {
+                            glColor3f(0.0, 1.0, 0.0);   // (verde)
+                        }
+                        else
+                        {
+                            glColor3f(0.0, 0.0, 1.0);   // (azul)
+                        }
                     }
 
-
-                    // Preview do poligono
-                    forward_list<vertice> v;
-                    if (contCoordenadas == 1)
+                    if (numVertices == 1)
                     {
-                        // Uma reta caso haja apenas dois vertices
-                        v = retaBresenham(mouseClick_x1, mouseClick_y1, m_x, m_y);
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
+                        desenhaLinha(x, y);
                     }
                     else
                     {
-                        // Um poligono (contando a posicao do mouse)
-                        double xo[numVertices+1];
-                        xo[numVertices] = (double) m_x;
-                        for (int j = 0; j < numVertices; j++)
-                        {
-                            xo[j] = x[j];
-                        }
-
-                        double yo[numVertices+1];
-                        yo[numVertices] = (double) m_y;
-                        for (int j = 0; j < numVertices; j++)
-                        {
-                            yo[j] = y[j];
-                        }
-
-                        v = preenchePoligono(xo, yo, numVertices+1);
-                        for (forward_list<vertice>::iterator it_v = v.begin(); it_v != v.end(); it_v++) {
-                            drawPixel(it_v->x, it_v->y, 0);
-                        }
+                        // Desenha a preview do poligono preenchido
+                        desenhaPoligonoPreenchido(x, y, numVertices+1);
                     }
                 }
             break;
@@ -1186,14 +1123,8 @@ void drawFormas()
                         aplicaTransformacao(&x[1], &y[1], tr);
                     }
 
-                    // Desenha o segmento de reta
-                    forward_list<vertice> vertices = retaBresenham(x[0], y[0], x[1], y[1]);
-                    for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                    {
-                        double desenhoX = v->x;
-                        double desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY, 0);
-                    }
+                    // Desenha a linha
+                    desenhaLinha(x, y);
                 }
             break;
 
@@ -1219,24 +1150,9 @@ void drawFormas()
                     }
 
                     // Desenha o retangulo
-                    forward_list<vertice> vertices;
-                    for (int k = 0; k < 4; k++)
+                    if (i == 4)
                     {
-                        if (k != 3)
-                        {
-                            vertices = retaBresenham(x[k], y[k], x[k+1], y[k+1]);
-                        }
-                        else
-                        {
-                            vertices = retaBresenham(x[k], y[k], x[0], y[0]);
-                        }
-
-                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                        {
-                            double desenhoX = v->x;
-                            double desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY, 0);
-                        }
+                        desenhaRetangulo(x, y);
                     }
                 }
             break;
@@ -1265,25 +1181,7 @@ void drawFormas()
                     // Desenha o triangulo
                     if (i == 3)
                     {
-                        forward_list<vertice> vertices;
-                        for (int j = 0; j < i; j++)
-                        {
-                            if (j != 2)
-                            {
-                                vertices = retaBresenham(x[j], y[j], x[j+1], y[j+1]);
-                            }
-                            else
-                            {
-                                vertices = retaBresenham(x[j], y[j], x[0], y[0]);
-                            }
-
-                            for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                            {
-                                double desenhoX = v->x;
-                                double desenhoY = v->y;
-                                drawPixel(desenhoX, desenhoY, 0);
-                            }
-                        }
+                        desenhaTriangulo(x, y);
                     }
                 }
             break;
@@ -1314,18 +1212,7 @@ void drawFormas()
                     }
 
                     // Desenha o poligono
-                    forward_list<vertice> vertices;
-                    for (int j = 0; j < numVertices-1; j++)
-                    {
-                        vertices = retaBresenham(x[j], y[j], x[j+1], y[j+1]);
-
-                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                        {
-                            double desenhoX = v->x;
-                            double desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY, 0);
-                        }
-                    }
+                    desenhaPoligono(x, y, numVertices);
                 }
             break;
 
@@ -1351,13 +1238,7 @@ void drawFormas()
                     }
 
                     // Desenha a circunferencia
-                    forward_list<vertice> vertices = circuloBresenham(x[1], y[1], x[0], y[0]);
-                    for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                    {
-                        double desenhoX = v->x;
-                        double desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY, 0);
-                    }
+                    desenhaCircunferencia(x, y);
                 }
             break;
 
@@ -1379,18 +1260,15 @@ void drawFormas()
                         aplicaTransformacao(&x, &y, tr);
                     }
 
-
                     // Determina a cor do pixel clicado
-                    float corPixelAntiga[3];
-                    glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, corPixelAntiga);
+                    float corAntiga[3];
+                    glReadPixels(x, y, 1, 1, GL_RGB, GL_FLOAT, corAntiga);
 
                     // Determina a cor nova
-                    float corPixelNova[] = {rSelec, gSelec, bSelec};
-
+                    float corNova[] = {f->rCor, f->gCor, f->bCor};
 
                     // Colore a area
-                    forward_list<vertice> vertices;
-                    algoritmoFloodFill(x, y, corPixelAntiga, corPixelNova, &vertices);
+                    desenhaBalde(x, y, corAntiga, corNova);
                 }
             break;
             
@@ -1415,13 +1293,10 @@ void drawFormas()
                         }
                     }
 
-                    // Desenha o retangulo rasterizado
-                    forward_list<vertice> vertices = preenchePoligono(x, y, 4);
-                    for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
+                    // Desenha o retangulo preenchido
+                    if (i == 4)
                     {
-                        double desenhoX = v->x;
-                        double desenhoY = v->y;
-                        drawPixel(desenhoX, desenhoY, 0);
+                        desenhaRetanguloPreenchido(x, y);
                     }
                 }
             break;
@@ -1447,16 +1322,10 @@ void drawFormas()
                         }
                     }
 
-                    // Desenha o triangulo
+                    // Desenha o triangulo preenchido
                     if (i == 3)
                     {
-                        forward_list<vertice> vertices = preenchePoligono(x, y, 3);
-                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                        {
-                            double desenhoX = v->x;
-                            double desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY, 0);
-                        }
+                        desenhaTrianguloPreenchido(x, y);
                     }
                 }
             break;
@@ -1486,22 +1355,14 @@ void drawFormas()
                         }
                     }
 
-                    // Desenha o poligono
-                    forward_list<vertice> vertices;
                     if (numVertices == 2)
                     {
-                        vertices = retaBresenham(x[0], y[0], x[1], y[1]);
-                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                        {
-                            double desenhoX = v->x;
-                            double desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY, 0);
-                        }
+                        desenhaLinha(x, y);
                     }
                     else if (numVertices > 2)
                     {
                         // Muda a cor do poligono temporariamente ao passar pelo vertice inicial
-                        if (numVertices >= 5 && m_x == x[numVertices-1] && m_y == y[numVertices-1])
+                        if (numVertices >= 4 && m_x == x[numVertices-1] && m_y == y[numVertices-1])
                         {
                             if (f->bCor > f->rCor && f->bCor > f-> gCor)
                             {
@@ -1513,18 +1374,10 @@ void drawFormas()
                             }
                         }
 
-                        vertices = preenchePoligono(x, y, numVertices);
-                        for (forward_list<vertice>::iterator v = vertices.begin(); v != vertices.end(); v++)
-                        {
-                            double desenhoX = v->x;
-                            double desenhoY = v->y;
-                            drawPixel(desenhoX, desenhoY, 0);
-                        }
+                        // Desenha o poligono preenchido
+                        desenhaPoligonoPreenchido(x, y, numVertices);
                     }
                 }
-            break;
-
-            default:
             break;
         }
     }
