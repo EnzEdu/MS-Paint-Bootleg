@@ -2,7 +2,7 @@
  * Atividade 15 - Computacao Grafica
  * Editor Grafico feito com OpenGL/GLUT
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 26/02/2023
+ * Data: 28/02/2023
 */
 
 
@@ -1575,10 +1575,11 @@ void verificaCliqueBotao(int mouseX, int mouseY)
         }
 
 
-    /* ====== Clique no botao de claridade ====== */
-        else if (mouseX >= 0 && mouseX <= 25)
+    /* ====== Clique nos botoes especiais ====== */
+        else if (mouseY >= height-25 && mouseY <= height-1)
         {
-            if (mouseY >= height-25 && mouseY <= height-1)
+            // Botao de claridade
+            if (mouseX > 0 && mouseX < 25)
             {
                 // Alterna a variavel nightMode (muda cores de multiplos desenhos na GUI)
                 nightMode = !nightMode;
@@ -1624,7 +1625,14 @@ void verificaCliqueBotao(int mouseX, int mouseY)
                     glClearColor(0.0, 0.0, 0.0, 0.0);
                 }
             }
+
+            // Botao de reset
+            else if (mouseX > 25 && mouseX < 50)
+            {
+                formas.clear();
+            }
         }
+
 
     // Reinicia variaveis em caso de clique de forma
     if (clicouForma == true)

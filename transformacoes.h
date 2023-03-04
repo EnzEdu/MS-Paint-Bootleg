@@ -2,7 +2,7 @@
  * Atividade 15 - Computacao Grafica
  * Codigo OpenGL responsavel pelas transformacoes geometricas do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 26/02/2023
+ * Data: 28/02/2023
 */
 
 #ifndef transformacoes_h

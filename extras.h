@@ -2,7 +2,7 @@
  * Atividade 15 - Computacao Grafica
  * Codigo OpenGL responsavel por conteudos extras do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 26/02/2023
+ * Data: 28/02/2023
 */
 
 #ifndef extras_h
@@ -429,6 +429,40 @@ void desenhaGUI(bool nightMode)
             }
 
 
+        // Botao de reset
+
+            // Cor da borda do retangulo (cinza-claro)
+            glColor3f(0.57, 0.58, 0.58);
+
+            // Desenho do retangulo
+            for (int k = 0; k <= 25; k++)
+            {
+                drawPixel(25+k, height-25, 1);
+                drawPixel(50-k, height-1 , 1);
+            }
+
+            for (int k = 0; k <= 24; k++)
+            {
+                drawPixel(25, height-25+k, 1);
+                drawPixel(50, height-25+k, 1);
+            }
+
+            // Colore o retangulo
+            cont = 0.0;
+            for (int j = 0; j <= 22; j++)
+            {
+                // Cor do ceu no anoitecer
+                glColor3f(0.02, 0.02, 0.15+cont);
+
+                for (int i = 0; i <= 23; i++)
+                {
+                    drawPixel(26+i, height-24+j, 1);
+                }
+
+                cont += 0.0138;
+            }
+
+
 
 
 //  4) Icones
@@ -815,6 +849,45 @@ void desenhaGUI(bool nightMode)
             v = retaBresenham(6 , height-20, 2 , height-23); desenhaVertices(v);
         }
 
+
+        // Borracha
+            // Cor
+            glColor3f(1.0, 1.0, 1.0);
+            for (int j = 0; j <= 3; j++)
+            {
+                v = retaBresenham(30, height-17+j, 37, height-18+j); desenhaVertices(v);
+            }
+            glColor3f(0.25, 0.25, 0.25);
+            for (int j = 0; j <= 2; j++)
+            {
+                v = retaBresenham(38, height-17+j, 47, height-11+j); desenhaVertices(v);
+            }
+            glColor3f(0.5, 0.5, 0.5);
+            v = retaBresenham(33, height-12, 38, height-7); desenhaVertices(v);
+            for (int j = 0; j <= 8; j++)
+            {
+                v = retaBresenham(34+j, height-12, 38+j, height-8); desenhaVertices(v);
+            }
+            v = retaBresenham(32, height-13, 39, height-13); desenhaVertices(v);
+            v = retaBresenham(35, height-14, 38, height-14); desenhaVertices(v);
+            v = retaBresenham(35, height-15, 38, height-15); desenhaVertices(v);
+
+
+            // Contorno
+            glColor3f(0.0, 0.0, 0.0);
+            v = retaBresenham(29, height-13, 29, height-18); desenhaVertices(v);
+            v = retaBresenham(29, height-18, 38, height-19); desenhaVertices(v);
+            v = retaBresenham(38, height-18, 47, height-12); desenhaVertices(v);
+            v = retaBresenham(47, height-12, 47, height-8 ); desenhaVertices(v);
+            v = retaBresenham(47, height-8 , 38, height-7 ); desenhaVertices(v);
+            v = retaBresenham(38, height-7 , 29, height-13); desenhaVertices(v);
+
+            v = retaBresenham(29, height-13, 38, height-15); desenhaVertices(v);
+            v = retaBresenham(38, height-15, 38, height-19); desenhaVertices(v);
+            v = retaBresenham(38, height-15, 47, height-8 ); desenhaVertices(v);
+
+
+
     glutPostRedisplay();
 }
 
@@ -1181,10 +1254,11 @@ void desenhaTextos()
 
 
 
-    /* ====== Mouse no botao de claridade ====== */
-        if (m_x >= 0 && m_x <= 25)
+    /* ====== Mouse em um botao especial ====== */
+        if (m_y >= height-25 && m_y <= height-1)
         {
-            if (m_y >= height-25 && m_y <= height-1)
+            // Botao de claridade
+            if (m_x > 0 && m_x < 25)
             {
                 if (nightMode == false)
                 {                    
@@ -1210,6 +1284,20 @@ void desenhaTextos()
                     glColor3f(0.0, 0.0, 0.0);
                     draw_text_stroke(mouse_x+10, mouse_y-25, "Alternar pra Dia", 0.08);
                 }
+            }
+
+            // Botao de reset
+            else if (m_x > 25 && m_x < 50)
+            {
+                double x[] = {mouse_x+8 , mouse_x+37, mouse_x+37, mouse_x+8};
+                double y[] = {mouse_y-27, mouse_y-27, mouse_y-15, mouse_y-15};
+
+                glColor3f(1.0, 1.0, 0.0);
+                forward_list<vertice> v = preenchePoligono(x, y, 4);
+                desenhaVertices(v);
+
+                glColor3f(0.0, 0.0, 0.0);
+                draw_text_stroke(mouse_x+10, mouse_y-25, "Reset", 0.08);
             }
         }
 }
