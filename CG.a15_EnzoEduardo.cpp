@@ -2,7 +2,8 @@
  * Atividade 15 - Computacao Grafica
  * Editor Grafico feito com OpenGL/GLUT
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 28/02/2023
+ * Data de apresentacao: 28/02/2023
+ * Ultima modificacao: 08/04/2023
 */
 
 
@@ -99,6 +100,7 @@ float rSelec, gSelec, bSelec;
 #include "transformacoes.h"
 #include "glut_text.h"
 #include "extras.h"
+#include "salvaImagem.h"
 
 
 
@@ -196,23 +198,23 @@ void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transf
 */
 int main(int argc, char** argv){
 
-    glutInit(&argc, argv);                          // Passagem de parametros C para o glut
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);    // Selecao do modo do Display e do sistema de Cor utilizado
-    glutInitWindowSize(width, height);              // Tamanho da janela do OpenGL
-    glutInitWindowPosition(700, 100);               // Posicao inicial da janela do OpenGL
-    glutCreateWindow("Computacao Grafica: Paint");  // Da nome para uma janela OpenGL
+    glutInit(&argc, argv);                                     // Passagem de parametros C para o glut
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);               // Selecao do modo do Display e do sistema de cor utilizado
+    glutInitWindowSize(width, height);                         // Tamanho da janela do OpenGL
+    glutInitWindowPosition(700, 100);                          // Posicao inicial da janela do OpenGL
+    glutCreateWindow("*img.ppm - Computacao Grafica: Paint");  // Da nome para uma janela OpenGL
 
-    init();                                         // Chama a funcao init()
+    init();                                                    // Chama a funcao init()
 
-    glutReshapeFunc(reshape);                       // Callback para redesenhar a tela
-    glutKeyboardFunc(keyboard);                     // Callback do teclado
-    glutMouseFunc(mouse);                           // Callback do mouse
-    glutPassiveMotionFunc(mousePassiveMotion);      // Callback do movimento passivo do mouse
-    glutDisplayFunc(display);                       // Callback de desenho
+    glutReshapeFunc(reshape);                                  // Callback para redesenhar a tela
+    glutKeyboardFunc(keyboard);                                // Callback do teclado
+    glutMouseFunc(mouse);                                      // Callback do mouse
+    glutPassiveMotionFunc(mousePassiveMotion);                 // Callback do movimento passivo do mouse
+    glutDisplayFunc(display);                                  // Callback de desenho
 
-    glutMainLoop();                                 // Executa o loop do OpenGL
+    glutMainLoop();                                            // Executa o loop do OpenGL
 
-    return EXIT_SUCCESS;                            // Retorna 0 para o tipo inteiro da funcao main()
+    return EXIT_SUCCESS;                                       // Retorna 0 para o tipo inteiro da funcao main()
 }
 
 
@@ -248,8 +250,8 @@ void init(void)
 
     glutCreateMenu(menu_popup);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
-    glutAddSubMenu("Formas"        , menuFormas);
-    glutAddSubMenu("Transformacoes", menuTransf);
+    glutAddSubMenu("Formas"                , menuFormas);
+    glutAddSubMenu("Transformacoes"        , menuTransf);
     glutAddMenuEntry("Sair", -1);
 }
 
@@ -334,6 +336,8 @@ void mouse(int button, int state, int x, int y)
 
                                         pushTransformacao(TRAN, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -352,6 +356,8 @@ void mouse(int button, int state, int x, int y)
 
                                         pushTransformacao(ESCA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -374,6 +380,8 @@ void mouse(int button, int state, int x, int y)
 
                                         pushTransformacao(CISA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -396,6 +404,8 @@ void mouse(int button, int state, int x, int y)
 
                                         pushTransformacao(REFL, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -421,6 +431,8 @@ void mouse(int button, int state, int x, int y)
 
                                         pushTransformacao(ROTA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -448,6 +460,8 @@ void mouse(int button, int state, int x, int y)
                                 pushForma(modoForma, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
+
+                                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
                             {
@@ -497,6 +511,8 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
+
+                                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
                             {
@@ -548,6 +564,8 @@ void mouse(int button, int state, int x, int y)
                                     contCoordenadas = 0;
                                     pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+
+                                    glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                 }
                             }
                             else
@@ -593,6 +611,8 @@ void mouse(int button, int state, int x, int y)
                                         click1 = false;
                                         contCoordenadas = 0;
                                         pushVertice(mouseClick_x2, mouseClick_y2, 0);
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -650,6 +670,8 @@ void mouse(int button, int state, int x, int y)
                                 pushForma(modoForma, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
+
+                                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
                             {
@@ -690,6 +712,8 @@ void mouse(int button, int state, int x, int y)
                             {
                                 pushForma(BAL, 1);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 1);
+
+                                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
                             {
@@ -719,6 +743,8 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
+
+                                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
                             {
@@ -770,6 +796,8 @@ void mouse(int button, int state, int x, int y)
                                     contCoordenadas = 0;
                                     pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
+
+                                    glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                 }
                             }
                             else
@@ -814,6 +842,8 @@ void mouse(int button, int state, int x, int y)
                                     {
                                         click1 = false;
                                         contCoordenadas = 0;
+
+                                        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
                                     {
@@ -893,8 +923,13 @@ void display(void)
 
     // Desenha as formas geometricas da lista
     drawFormas();
-
-
+    /*
+    // Nomeia a janela com base nas operacoes
+    if (contCoordenadas > 0)
+    {
+        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
+    }
+    */
     // Troca os buffers
     glutSwapBuffers();
 }
@@ -1630,6 +1665,32 @@ void verificaCliqueBotao(int mouseX, int mouseY)
             else if (mouseX > 25 && mouseX < 50)
             {
                 formas.clear();
+
+                glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
+            }
+        }
+
+        else if (mouseY > height-50 && mouseY < height-24)
+        {
+            // Botao de salvar
+            if (mouseX > 0 && mouseX < 25)
+            {
+                // Calcula a quantidade de pixels da area de desenho,
+                // com base no tamanho da janela
+                int qntPixels = width * (height - 50);
+
+                // Calcula a quantidade de valores RGB total da area
+                int qntValoresCor = qntPixels*3;
+
+                // Cria o vetor de cores RGB da area de desenho e o popula
+                float areaDesenho[qntValoresCor];
+                glReadPixels(0, 0, width, height-50, GL_RGB, GL_FLOAT, areaDesenho);
+
+                // Salva a imagem em PPM
+                exportaP6PPM(areaDesenho, qntValoresCor);
+                printf("SALVAR!!!!!\n");
+
+                glutSetWindowTitle("img.ppm - Computacao Grafica: Paint");
             }
         }
 

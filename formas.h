@@ -2,7 +2,8 @@
  * Atividade 15 - Computacao Grafica
  * Codigo OpenGL responsavel pelo desenho das formas no editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 28/02/2023
+ * Data de apresentacao: 28/02/2023
+ * Ultima modificacao: 08/04/2023
 */
 
 #ifndef formas_h

@@ -2,7 +2,8 @@
  * Atividade 15 - Computacao Grafica
  * Codigo OpenGL responsavel por conteudos extras do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
- * Data: 28/02/2023
+ * Data de apresentacao: 28/02/2023
+ * Ultima modificacao: 08/04/2023
 */
 
 #ifndef extras_h
@@ -463,6 +464,40 @@ void desenhaGUI(bool nightMode)
             }
 
 
+        // Botao de salvar
+
+            // Cor da borda do retangulo (cinza-claro)
+            glColor3f(0.57, 0.58, 0.58);
+
+            // Desenho do retangulo
+            for (int k = 0; k <= 25; k++)
+            {
+                drawPixel(0+k , height-50, 1);
+                drawPixel(25-k, height-25, 1);
+            }
+
+            for (int k = 0; k <= 24; k++)
+            {
+                drawPixel(0 , height-50+k, 1);
+                drawPixel(25, height-50+k, 1);
+            }
+
+            // Colore o retangulo
+            cont = 0.0;
+            for (int j = 0; j <= 23; j++)
+            {
+                // Cor do ceu no anoitecer
+                glColor3f(0.02, 0.02, 0.15+cont);
+
+                for (int i = 0; i <= 23; i++)
+                {
+                    drawPixel(1+i, height-49+j, 1);
+                }
+
+                cont += 0.0138;
+            }
+
+
 
 
 //  4) Icones
@@ -501,6 +536,7 @@ void desenhaGUI(bool nightMode)
 
 
         // Retangulo
+
             // Barra inferior
             for (int k = 0; k <= 13; k++)
             {
@@ -851,6 +887,7 @@ void desenhaGUI(bool nightMode)
 
 
         // Borracha
+
             // Cor
             glColor3f(1.0, 1.0, 1.0);
             for (int j = 0; j <= 3; j++)
@@ -885,6 +922,12 @@ void desenhaGUI(bool nightMode)
             v = retaBresenham(29, height-13, 38, height-15); desenhaVertices(v);
             v = retaBresenham(38, height-15, 38, height-19); desenhaVertices(v);
             v = retaBresenham(38, height-15, 47, height-8 ); desenhaVertices(v);
+
+
+        // Disquete
+
+            // Cor
+            
 
 
 
