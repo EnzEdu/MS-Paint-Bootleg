@@ -3,7 +3,7 @@
  * Editor Grafico feito com OpenGL/GLUT
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 11/04/2023
+ * Ultima modificacao:   11/04/2023
 */
 
 
@@ -187,7 +187,7 @@ void verificaCliqueBotao(int mouseX, int mouseY);
 void drawFormas();
 
 // Funcao que percorre a lista de transformacoes geometricas de cada forma, aplicando-as nas coordenadas
-void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transformacao>::iterator tr);
+void aplicaTransformacao(double *desenhoX, double *desenhoY, int centroX, int centroY, forward_list<transformacao>::iterator tr);
 
 
 
@@ -337,6 +337,7 @@ void mouse(int button, int state, int x, int y)
                                         pushTransformacao(TRAN, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -357,6 +358,7 @@ void mouse(int button, int state, int x, int y)
                                         pushTransformacao(ESCA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -381,6 +383,7 @@ void mouse(int button, int state, int x, int y)
                                         pushTransformacao(CISA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -405,6 +408,7 @@ void mouse(int button, int state, int x, int y)
                                         pushTransformacao(REFL, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -432,6 +436,7 @@ void mouse(int button, int state, int x, int y)
                                         pushTransformacao(ROTA, vetorDeslocamento);
                                         printf("ADICIONOU!!!!!!\n");
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -461,6 +466,7 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
 
+                                // Muda o titulo da janela (alteracoes nao salvas)
                                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
@@ -512,6 +518,7 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x2, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
 
+                                // Muda o titulo da janela (alteracoes nao salvas)
                                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
@@ -565,6 +572,7 @@ void mouse(int button, int state, int x, int y)
                                     pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
 
+                                    // Muda o titulo da janela (alteracoes nao salvas)
                                     glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                 }
                             }
@@ -612,6 +620,7 @@ void mouse(int button, int state, int x, int y)
                                         contCoordenadas = 0;
                                         pushVertice(mouseClick_x2, mouseClick_y2, 0);
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -671,6 +680,7 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x2, mouseClick_y2, 0);
 
+                                // Muda o titulo da janela (alteracoes nao salvas)
                                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
@@ -713,6 +723,7 @@ void mouse(int button, int state, int x, int y)
                                 pushForma(BAL, 1);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 1);
 
+                                // Muda o titulo da janela (alteracoes nao salvas)
                                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
@@ -744,6 +755,7 @@ void mouse(int button, int state, int x, int y)
                                 pushVertice(mouseClick_x2, mouseClick_y1, 0);
                                 pushVertice(mouseClick_x1, mouseClick_y1, 0);
 
+                                // Muda o titulo da janela (alteracoes nao salvas)
                                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                             }
                             else
@@ -797,6 +809,7 @@ void mouse(int button, int state, int x, int y)
                                     pushVertice(mouseClick_x2, mouseClick_y2, 0);
                                     printf("Clique 3(%d, %d)\n", mouseClick_x2, mouseClick_y2);
 
+                                    // Muda o titulo da janela (alteracoes nao salvas)
                                     glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                 }
                             }
@@ -843,6 +856,7 @@ void mouse(int button, int state, int x, int y)
                                         click1 = false;
                                         contCoordenadas = 0;
 
+                                        // Muda o titulo da janela (alteracoes nao salvas)
                                         glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
                                     }
                                     else
@@ -923,13 +937,7 @@ void display(void)
 
     // Desenha as formas geometricas da lista
     drawFormas();
-    /*
-    // Nomeia a janela com base nas operacoes
-    if (contCoordenadas > 0)
-    {
-        glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
-    }
-    */
+
     // Troca os buffers
     glutSwapBuffers();
 }
@@ -1142,6 +1150,7 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     double x[2], y[2];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1149,13 +1158,20 @@ void drawFormas()
                     {
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= 2;
+                    centroY /= 2;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                     {
-                        aplicaTransformacao(&x[0], &y[0], tr);
-                        aplicaTransformacao(&x[1], &y[1], tr);
+                        aplicaTransformacao(&x[0], &y[0], centroX, centroY, tr);
+                        aplicaTransformacao(&x[1], &y[1], centroX, centroY, tr);
                     }
 
                     // Desenha a linha
@@ -1167,20 +1183,28 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     double x[4], y[4];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= 4;
+                    centroY /= 4;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < 4; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1196,20 +1220,28 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     double x[3], y[3];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++) {
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= 3;
+                    centroY /= 3;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < 3; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1228,6 +1260,7 @@ void drawFormas()
 
                     // Listas com os x e y de cada vertice da forma
                     double x[numVertices], y[numVertices];
+                    int centroX = 0, centroY = 0;
                     
                     // Salva as coordenadas de cada vertice
                     int i = 0;
@@ -1235,14 +1268,21 @@ void drawFormas()
                     {
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= numVertices;
+                    centroY /= numVertices;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < numVertices; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1256,6 +1296,7 @@ void drawFormas()
                     // Listas com os x e y de cada vertice da forma
                     int i = 0;
                     double x[2], y[2];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice da forma
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
@@ -1263,12 +1304,16 @@ void drawFormas()
                         y[i] = v->y;
                     }
 
+                    // Identifica o centro do poligono
+                    centroX = x[0];
+                    centroY = y[0];
+
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < 2; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1291,8 +1336,7 @@ void drawFormas()
                     // Aplica as transformacoes armazenadas na forma
                     for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                     {
-                        aplicaTransformacao(&x, &y, tr);
-                        aplicaTransformacao(&x, &y, tr);
+                        aplicaTransformacao(&x, &y, x, y, tr);
                     }
 
                     // Determina a cor do pixel clicado
@@ -1311,20 +1355,28 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     double x[4], y[4];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
                     for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= 4;
+                    centroY /= 4;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < 4; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1340,20 +1392,28 @@ void drawFormas()
                 {
                     // Listas com os x e y de cada vertice da forma
                     double x[3], y[3];
+                    int centroX = 0, centroY = 0;
 
                     // Salva as coordenadas de cada vertice
                     int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++) {
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= 3;
+                    centroY /= 3;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < 3; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1372,21 +1432,29 @@ void drawFormas()
 
                     // Listas com os x e y de cada vertice da forma
                     double x[numVertices], y[numVertices];
-                    
+                    int centroX = 0, centroY = 0;
+
                     // Salva as coordenadas de cada vertice
                     int i = 0;
                     for (forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++)
                     {
                         x[i] = v->x;
                         y[i] = v->y;
+
+                        centroX += (int) x[i];
+                        centroY += (int) y[i];
                     }
+
+                    // Identifica o centro do poligono pela media aritmetica dos vertices
+                    centroX /= numVertices;
+                    centroY /= numVertices;
 
                     // Aplica as transformacoes armazenadas na forma
                     for (int k = 0; k < numVertices; k++)
                     {
                         for (forward_list<transformacao>::iterator tr = f->t.begin(); tr != f->t.end(); tr++)
                         {
-                            aplicaTransformacao(&x[k], &y[k], tr);
+                            aplicaTransformacao(&x[k], &y[k], centroX, centroY, tr);
                         }
                     }
 
@@ -1664,8 +1732,10 @@ void verificaCliqueBotao(int mouseX, int mouseY)
             // Botao de reset
             else if (mouseX > 25 && mouseX < 50)
             {
+                // Limpa a lista de formas
                 formas.clear();
 
+                // Muda o titulo da janela (alteracoes nao salvas)
                 glutSetWindowTitle("*img.ppm - Computacao Grafica: Paint");
             }
         }
@@ -1675,6 +1745,8 @@ void verificaCliqueBotao(int mouseX, int mouseY)
             // Botao de salvar
             if (mouseX > 0 && mouseX < 25)
             {
+                printf("SALVAR!!!!!\n");
+
                 // Calcula a quantidade de pixels da area de desenho,
                 // com base no tamanho da janela
                 int qntPixels = width * (height - 50);
@@ -1688,8 +1760,8 @@ void verificaCliqueBotao(int mouseX, int mouseY)
 
                 // Salva a imagem em PPM
                 exportaP6PPM(areaDesenho, qntValoresCor);
-                printf("SALVAR!!!!!\n");
 
+                // Muda o titulo da janela (alteracoes salvas)
                 glutSetWindowTitle("img.ppm - Computacao Grafica: Paint");
             }
         }
@@ -1707,7 +1779,7 @@ void verificaCliqueBotao(int mouseX, int mouseY)
 /*
  * Funcao responsavel por aplicar as transformacoes da forma em cada vertice da mesma
  */
-void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transformacao>::iterator tr)
+void aplicaTransformacao(double *desenhoX, double *desenhoY, int centroX, int centroY, forward_list<transformacao>::iterator tr)
 {
     // Aplica a transformacao geometrica com base no tipo
     switch (tr->tipo)
@@ -1733,16 +1805,15 @@ void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transf
         case REFL:
             {
                 reflexao(desenhoX, desenhoY, tr->vtf[0]);
-
                 switch ((char) tr->vtf[0])
                 {
-                    case 'x': translacao(desenhoX, desenhoY, 0, *desenhoY + (height - *desenhoY));
+                    case 'x': translacao(desenhoX, desenhoY, 0, 2*centroY);
                     break;
 
-                    case 'y': translacao(desenhoX, desenhoY, *desenhoX + (width - *desenhoX), 0);
+                    case 'y': translacao(desenhoX, desenhoY, 2*centroX, 0);
                     break;
 
-                    case '0': translacao(desenhoX, desenhoY, *desenhoX + (width - *desenhoX), *desenhoY + (height - *desenhoY));
+                    case '0': translacao(desenhoX, desenhoY, 2*centroX, 2*centroY);
                     break;
                 }
             }
@@ -1750,11 +1821,9 @@ void aplicaTransformacao(double *desenhoX, double *desenhoY, forward_list<transf
 
         case ROTA:
             {
-                double centroideX = width/2, centroideY = height/2;
-
-                translacao(desenhoX, desenhoY, -centroideX, -centroideY);
+                translacao(desenhoX, desenhoY, -centroX, -centroY);
                 rotacao(desenhoX, desenhoY, tr->vtf[0]);
-                translacao(desenhoX, desenhoY, centroideX, centroideY);
+                translacao(desenhoX, desenhoY, centroX, centroY);
             }
         break;
     }

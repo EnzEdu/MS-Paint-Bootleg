@@ -3,7 +3,7 @@
  * Codigo OpenGL responsavel por conteudos extras do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 11/04/2023
+ * Ultima modificacao:   11/04/2023
 */
 
 #ifndef extras_h
