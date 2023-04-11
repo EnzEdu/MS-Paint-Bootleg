@@ -3,7 +3,7 @@
  * Codigo OpenGL responsavel pelos algoritmos usados no editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 08/04/2023
+ * Ultima modificacao: 11/04/2023
 */
 
 #ifndef algoritmos_h

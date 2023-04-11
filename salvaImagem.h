@@ -3,7 +3,7 @@
  * Codigo OpenGL responsavel por salvar a area de desenho em um arquivo
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 08/04/2023
+ * Ultima modificacao: 11/04/2023
 */
 
 #ifndef salvaimagem_h
@@ -20,7 +20,7 @@ void exportaP3PPM(float areaDesenho[], int qntValoresCor)
 
 	for (int i = 0; i < qntValoresCor; i++)
 	{
-		// Escreve o valor de cada canal de cor de cada pixel
+		// Escreve o valor de cada canal de cor de cada pixel no arquivo
 		fprintf(arq, "%d\n", (int) round(255 * areaDesenho[i]));
 	}
 
@@ -47,7 +47,7 @@ void exportaP6PPM(float areaDesenho[], int qntValoresCor)
 			corPixelByte[1] = (int) round(255 * areaDesenho[i+1]);
 			corPixelByte[2] = (int) round(255 * areaDesenho[i+2]);
 
-			// Escreve os bytes equivalentes a cor do pixel 
+			// Escreve os bytes equivalentes a cor do pixel no arquivo 
 			fwrite(corPixelByte, 1, 3, arq);
 		}
 	}

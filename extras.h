@@ -3,7 +3,7 @@
  * Codigo OpenGL responsavel por conteudos extras do editor grafico
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 08/04/2023
+ * Ultima modificacao: 11/04/2023
 */
 
 #ifndef extras_h
@@ -486,15 +486,15 @@ void desenhaGUI(bool nightMode)
             cont = 0.0;
             for (int j = 0; j <= 23; j++)
             {
-                // Cor do ceu no anoitecer
-                glColor3f(0.02, 0.02, 0.15+cont);
+                // Cor do ceu no por do sol
+                glColor3f(0.9, 0.30+cont, 0.0);
 
                 for (int i = 0; i <= 23; i++)
                 {
                     drawPixel(1+i, height-49+j, 1);
                 }
 
-                cont += 0.0138;
+                cont += 0.0136;
             }
 
 
@@ -926,9 +926,37 @@ void desenhaGUI(bool nightMode)
 
         // Disquete
 
-            // Cor
-            
+            // Caixa (preto)
+            glColor3f(0.0, 0.0, 0.0);
+            v = retaBresenham(4 , height-48, 21, height-48); desenhaVertices(v);
+            v = retaBresenham(21, height-48, 21, height-29); desenhaVertices(v);
+            v = retaBresenham(21, height-29, 19, height-27); desenhaVertices(v);
+            v = retaBresenham(19, height-27,  4, height-27); desenhaVertices(v);
+            v = retaBresenham( 4, height-27,  4, height-48); desenhaVertices(v);
+            for (int j = 0; j < 20; j++)
+            {
+                v = retaBresenham(4, height-48+j, 21, height-48+j); desenhaVertices(v);
+            }
+            v = retaBresenham(4 , height-28, 20, height-28); desenhaVertices(v);
+            v = retaBresenham(4 , height-27, 19, height-27); desenhaVertices(v);
 
+
+            // Lamina de metal (cinza-claro)
+            glColor3f(0.67, 0.67, 0.67);
+            for (int j = 0; j < 6; j++)
+            {
+                v = retaBresenham(7, height-32+j, 18, height-32+j); desenhaVertices(v);
+            }
+            glColor3f(0.0, 0.0, 0.0);
+            v = retaBresenham(16, height-32, 16, height-27); desenhaVertices(v);
+
+
+            // Area de escrever (cinza)
+            glColor3f(0.3, 0.3, 0.3);
+            for (int j = 0; j < 11; j++)
+            {
+                v = retaBresenham(6, height-48+j, 19, height-48+j); desenhaVertices(v);
+            }
 
 
     glutPostRedisplay();

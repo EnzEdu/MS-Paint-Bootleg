@@ -3,7 +3,7 @@
  * Editor Grafico feito com OpenGL/GLUT
  * Autor: Enzo Eduardo Cassiano Ibiapina
  * Data de apresentacao: 28/02/2023
- * Ultima modificacao: 08/04/2023
+ * Ultima modificacao: 11/04/2023
 */
 
 
@@ -17,9 +17,9 @@
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
 #else                                   // Windows/Linux
-    #include <GL/glut.h>
-    #include <GL/gl.h>
-    #include <GL/glu.h>
+    #include "libs/glut.h"
+    #include "libs/gl.h"
+    #include "libs/glu.h"
 #endif
 
 

@@ -11,7 +11,7 @@
     #define GL_SILENCE_DEPRECATION
     #include <GLUT/glut.h>
 #else
-    #include <GL/glut.h>
+    #include "libs/glut.h"
 #endif
 
 #include <string>
